@@ -155,16 +155,26 @@ class EpicCAPApp {
       rectifyModalTitle: document.getElementById('rectifyModalTitle'),
       closeRectifyModalBtn: document.getElementById('closeRectifyModalBtn'),
       cancelRectifyBtn: document.getElementById('cancelRectifyBtn'),
+      rectifyRefThumbWrap: document.getElementById('rectifyRefThumbWrap'),
       rectifyRefThumb: document.getElementById('rectifyRefThumb'),
+      rectifyRefSerialBadge: document.getElementById('rectifyRefSerialBadge'),
+      rectifyRefRiskBadge: document.getElementById('rectifyRefRiskBadge'),
       rectifyRefFinding: document.getElementById('rectifyRefFinding'),
       rectifyRefLocation: document.getElementById('rectifyRefLocation'),
-      rectifyCameraViewport: document.getElementById('rectifyCameraViewport'),
-      rectifyCameraVideo: document.getElementById('rectifyCameraVideo'),
-      rectifyPreviewImg: document.getElementById('rectifyPreviewImg'),
-      rectifyTakeLiveBtn: document.getElementById('rectifyTakeLiveBtn'),
+      rectifyCapturePrompt: document.getElementById('rectifyCapturePrompt'),
       rectifyPhoneCameraInput: document.getElementById('rectifyPhoneCameraInput'),
       rectifyGalleryInput: document.getElementById('rectifyGalleryInput'),
+      rectifyToggleWebcamBtn: document.getElementById('rectifyToggleWebcamBtn'),
+      rectifyPreviewContainer: document.getElementById('rectifyPreviewContainer'),
+      rectifyPreviewImg: document.getElementById('rectifyPreviewImg'),
+      rectifyRetakeInput: document.getElementById('rectifyRetakeInput'),
+      rectifyRemovePhotoBtn: document.getElementById('rectifyRemovePhotoBtn'),
+      rectifyWebcamContainer: document.getElementById('rectifyWebcamContainer'),
+      rectifyCameraViewport: document.getElementById('rectifyCameraViewport'),
+      rectifyCameraVideo: document.getElementById('rectifyCameraVideo'),
+      rectifyTakeLiveBtn: document.getElementById('rectifyTakeLiveBtn'),
       rectifyFlipBtn: document.getElementById('rectifyFlipBtn'),
+      rectifyCloseWebcamBtn: document.getElementById('rectifyCloseWebcamBtn'),
       rectifyRemarksInput: document.getElementById('rectifyRemarksInput'),
       submitRectificationBtn: document.getElementById('submitRectificationBtn'),
 
@@ -825,11 +835,23 @@ class EpicCAPApp {
 
     this.dom.rectifyModalTitle.innerHTML = `<span class="icon-label">${ICONS.rectify} <span>Rectify Observation: ${obs.serial}</span></span>`;
     this.dom.rectifyRefThumb.src = obs.imageDataUrl || obs.pictorialEvidenceUrl || '';
+    if (this.dom.rectifyRefSerialBadge) {
+      this.dom.rectifyRefSerialBadge.textContent = `Finding #${obs.serial}`;
+    }
+    if (this.dom.rectifyRefRiskBadge) {
+      const risk = obs.riskLevel || 'Priority 2';
+      this.dom.rectifyRefRiskBadge.textContent = risk;
+      this.dom.rectifyRefRiskBadge.className = `risk-badge ${risk === 'Priority 1' ? 'risk-high' : risk === 'Priority 3' ? 'risk-low' : 'risk-med'}`;
+    }
     this.dom.rectifyRefFinding.textContent = obs.findings;
     this.dom.rectifyRefLocation.innerHTML = `<span class="icon-label">${ICONS.location} <span>${obs.location}</span></span>`;
 
+    // Reset capture / preview UI states
     this.clearRectifySourcePreview();
-    this.startRectifyCamera();
+    if (this.dom.rectifyRemarksInput) {
+      this.dom.rectifyRemarksInput.value = 'Rectified as per electrical safety standard';
+    }
+
     this.dom.rectifyModal.classList.remove('hidden');
   }
 
@@ -846,6 +868,7 @@ class EpicCAPApp {
       this.dom.rectifyCameraVideo.srcObject = this.rectifyStream;
     } catch (err) {
       console.warn('Rectify camera stream unavailable, using upload fallback:', err);
+      this.showToast('Webcam stream unavailable. Please use Phone Camera or Files.');
     }
   }
 
@@ -867,7 +890,15 @@ class EpicCAPApp {
 
     this.currentRectifySource = canvas;
     this.dom.rectifyPreviewImg.src = canvas.toDataURL('image/jpeg', 0.95);
-    this.dom.rectifyPreviewImg.classList.remove('hidden');
+    if (this.dom.rectifyPreviewContainer) this.dom.rectifyPreviewContainer.classList.remove('hidden');
+    if (this.dom.rectifyCapturePrompt) this.dom.rectifyCapturePrompt.classList.add('hidden');
+    if (this.dom.rectifyWebcamContainer) {
+      this.dom.rectifyWebcamContainer.classList.add('hidden');
+      if (this.rectifyStream) {
+        this.rectifyStream.getTracks().forEach(t => t.stop());
+        this.rectifyStream = null;
+      }
+    }
     this.showToast('Corrected photo snapped.');
   }
 
@@ -877,16 +908,38 @@ class EpicCAPApp {
     img.onload = () => {
       this.currentRectifySource = img;
       this.dom.rectifyPreviewImg.src = img.src;
-      this.dom.rectifyPreviewImg.classList.remove('hidden');
-      this.showToast('Corrected photo loaded.');
+      if (this.dom.rectifyPreviewContainer) this.dom.rectifyPreviewContainer.classList.remove('hidden');
+      if (this.dom.rectifyCapturePrompt) this.dom.rectifyCapturePrompt.classList.add('hidden');
+      if (this.dom.rectifyWebcamContainer) {
+        this.dom.rectifyWebcamContainer.classList.add('hidden');
+        if (this.rectifyStream) {
+          this.rectifyStream.getTracks().forEach(t => t.stop());
+          this.rectifyStream = null;
+        }
+      }
+      this.showToast('Corrected photo ready.');
     };
     img.src = URL.createObjectURL(file);
   }
 
   clearRectifySourcePreview() {
     this.currentRectifySource = null;
-    this.dom.rectifyPreviewImg.classList.add('hidden');
-    this.dom.rectifyPreviewImg.src = '';
+    if (this.dom.rectifyPreviewImg) {
+      this.dom.rectifyPreviewImg.src = '';
+    }
+    if (this.dom.rectifyPreviewContainer) {
+      this.dom.rectifyPreviewContainer.classList.add('hidden');
+    }
+    if (this.dom.rectifyCapturePrompt) {
+      this.dom.rectifyCapturePrompt.classList.remove('hidden');
+    }
+    if (this.dom.rectifyWebcamContainer) {
+      this.dom.rectifyWebcamContainer.classList.add('hidden');
+    }
+    if (this.rectifyStream) {
+      this.rectifyStream.getTracks().forEach(t => t.stop());
+      this.rectifyStream = null;
+    }
   }
 
   async submitRectification() {
@@ -1213,7 +1266,10 @@ class EpicCAPApp {
     this.dom.tabPanes.forEach(p => p.classList.toggle('active', p.id === `${tabKey}Tab`));
 
     if (tabKey === 'capture') {
-      this.startCamera();
+      const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
+      if (!isMobile) {
+        this.startCamera();
+      }
     } else {
       this.stopCaptureCamera();
     }
@@ -1672,26 +1728,84 @@ class EpicCAPApp {
     // Rectification Modal Actions
     this.dom.closeRectifyModalBtn.addEventListener('click', () => {
       this.dom.rectifyModal.classList.add('hidden');
-      if (this.rectifyStream) this.rectifyStream.getTracks().forEach(t => t.stop());
+      if (this.rectifyStream) {
+        this.rectifyStream.getTracks().forEach(t => t.stop());
+        this.rectifyStream = null;
+      }
     });
     this.dom.cancelRectifyBtn.addEventListener('click', () => {
       this.dom.rectifyModal.classList.add('hidden');
-      if (this.rectifyStream) this.rectifyStream.getTracks().forEach(t => t.stop());
+      if (this.rectifyStream) {
+        this.rectifyStream.getTracks().forEach(t => t.stop());
+        this.rectifyStream = null;
+      }
     });
 
-    this.dom.rectifyTakeLiveBtn.addEventListener('click', () => this.takeRectifyLivePhoto());
-    this.dom.rectifyPhoneCameraInput.addEventListener('change', (e) => {
-      this.handleRectifyFileInput(e.target.files[0]);
-      e.target.value = '';
-    });
-    this.dom.rectifyGalleryInput.addEventListener('change', (e) => {
-      this.handleRectifyFileInput(e.target.files[0]);
-      e.target.value = '';
-    });
-    this.dom.rectifyFlipBtn.addEventListener('click', () => {
-      this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
-      this.startRectifyCamera();
-    });
+    if (this.dom.rectifyRefThumbWrap) {
+      this.dom.rectifyRefThumbWrap.addEventListener('click', () => {
+        if (this.activeTargetObs) {
+          this.openPhotoDetailModal(this.activeTargetObs);
+        }
+      });
+    }
+
+    if (this.dom.rectifyToggleWebcamBtn) {
+      this.dom.rectifyToggleWebcamBtn.addEventListener('click', () => {
+        if (this.dom.rectifyCapturePrompt) this.dom.rectifyCapturePrompt.classList.add('hidden');
+        if (this.dom.rectifyWebcamContainer) this.dom.rectifyWebcamContainer.classList.remove('hidden');
+        this.startRectifyCamera();
+      });
+    }
+
+    if (this.dom.rectifyCloseWebcamBtn) {
+      this.dom.rectifyCloseWebcamBtn.addEventListener('click', () => {
+        if (this.rectifyStream) {
+          this.rectifyStream.getTracks().forEach(t => t.stop());
+          this.rectifyStream = null;
+        }
+        if (this.dom.rectifyWebcamContainer) this.dom.rectifyWebcamContainer.classList.add('hidden');
+        if (this.dom.rectifyCapturePrompt) this.dom.rectifyCapturePrompt.classList.remove('hidden');
+      });
+    }
+
+    if (this.dom.rectifyTakeLiveBtn) {
+      this.dom.rectifyTakeLiveBtn.addEventListener('click', () => this.takeRectifyLivePhoto());
+    }
+
+    if (this.dom.rectifyPhoneCameraInput) {
+      this.dom.rectifyPhoneCameraInput.addEventListener('change', (e) => {
+        this.handleRectifyFileInput(e.target.files[0]);
+        e.target.value = '';
+      });
+    }
+
+    if (this.dom.rectifyGalleryInput) {
+      this.dom.rectifyGalleryInput.addEventListener('change', (e) => {
+        this.handleRectifyFileInput(e.target.files[0]);
+        e.target.value = '';
+      });
+    }
+
+    if (this.dom.rectifyRetakeInput) {
+      this.dom.rectifyRetakeInput.addEventListener('change', (e) => {
+        this.handleRectifyFileInput(e.target.files[0]);
+        e.target.value = '';
+      });
+    }
+
+    if (this.dom.rectifyRemovePhotoBtn) {
+      this.dom.rectifyRemovePhotoBtn.addEventListener('click', () => {
+        this.clearRectifySourcePreview();
+      });
+    }
+
+    if (this.dom.rectifyFlipBtn) {
+      this.dom.rectifyFlipBtn.addEventListener('click', () => {
+        this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
+        this.startRectifyCamera();
+      });
+    }
+
     this.dom.submitRectificationBtn.addEventListener('click', () => this.submitRectification());
 
     // Capture New Finding Actions

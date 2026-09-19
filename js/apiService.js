@@ -10,6 +10,8 @@
  * - sync_operation, write_log
  */
 
+import { redisCache } from './cacheEngine.js';
+
 const STORAGE_KEY_GAS_URL = 'cap_gas_api_url';
 const STORAGE_KEY_ACTIVE_PLANT = 'cap_active_plant';
 const STORAGE_KEY_CURRENT_USER = 'cap_current_user';
@@ -80,6 +82,7 @@ export class ApiService {
     this.sessionToken = '';
     localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
     localStorage.removeItem(STORAGE_KEY_SESSION_TOKEN);
+    redisCache.clear();
   }
 
   getCurrentUser() {
@@ -178,6 +181,7 @@ export class ApiService {
 
   /**
    * List all date-wise CAP reports available for a plant (tabs in workbook)
+   * Cached via redisCache with 60s TTL for instant tab switching
    */
   async listPlantReports(plant = null) {
     const targetPlant = plant || this.activePlant || 'CIPL';
@@ -186,15 +190,17 @@ export class ApiService {
       return { success: true, plant: targetPlant, reports: [] };
     }
 
-    try {
-      return await this.postRequest({
-        action: 'list_plant_reports',
-        plant: targetPlant
-      });
-    } catch (err) {
-      console.warn('[ApiService] Could not fetch remote plant reports:', err.message);
-      return { success: false, plant: targetPlant, reports: [], error: err.message };
-    }
+    return redisCache.getOrFetch(`plant_reports:${targetPlant}`, async () => {
+      try {
+        return await this.postRequest({
+          action: 'list_plant_reports',
+          plant: targetPlant
+        });
+      } catch (err) {
+        console.warn('[ApiService] Could not fetch remote plant reports:', err.message);
+        return { success: false, plant: targetPlant, reports: [], error: err.message };
+      }
+    }, 60000);
   }
 
   /**
@@ -217,11 +223,13 @@ export class ApiService {
     }
 
     try {
-      return await this.postRequest({
+      const res = await this.postRequest({
         action: 'ensure_plant_report',
         plant: targetPlant,
         reportDate: targetDate
       });
+      redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
+      return res;
     } catch (err) {
       console.warn('[ApiService] Could not ensure remote plant report:', err.message);
       return {
@@ -237,6 +245,7 @@ export class ApiService {
 
   /**
    * Fetch existing plant observations from the date tab
+   * Cached via redisCache with 45s TTL for high UI responsiveness
    */
   async getPlantReportInfo(plant = null, reportDate = null) {
     const targetPlant = plant || this.activePlant || 'CIPL';
@@ -246,20 +255,23 @@ export class ApiService {
       return { found: false, plant: targetPlant, reportDate: targetDate, observations: [] };
     }
 
-    try {
-      return await this.postRequest({
-        action: 'get_plant_report_info',
-        plant: targetPlant,
-        reportDate: targetDate
-      });
-    } catch (err) {
-      console.warn('[ApiService] Could not fetch remote sheet observations:', err.message);
-      return { found: false, plant: targetPlant, reportDate: targetDate, observations: [], error: err.message };
-    }
+    return redisCache.getOrFetch(`report_info:${targetPlant}:${targetDate}`, async () => {
+      try {
+        return await this.postRequest({
+          action: 'get_plant_report_info',
+          plant: targetPlant,
+          reportDate: targetDate
+        });
+      } catch (err) {
+        console.warn('[ApiService] Could not fetch remote sheet observations:', err.message);
+        return { found: false, plant: targetPlant, reportDate: targetDate, observations: [], error: err.message };
+      }
+    }, 45000);
   }
 
   /**
    * Get report summary for a plant (from SUMMARY tab)
+   * Cached via redisCache with 60s TTL
    */
   async getReportSummary(plant = null) {
     const targetPlant = plant || this.activePlant || 'CIPL';
@@ -268,14 +280,16 @@ export class ApiService {
       return { success: true, plant: targetPlant, overall: {}, dates: [] };
     }
 
-    try {
-      return await this.postRequest({
-        action: 'get_report_summary',
-        plant: targetPlant
-      });
-    } catch (err) {
-      return { success: false, plant: targetPlant, overall: {}, dates: [], error: err.message };
-    }
+    return redisCache.getOrFetch(`report_summary:${targetPlant}`, async () => {
+      try {
+        return await this.postRequest({
+          action: 'get_report_summary',
+          plant: targetPlant
+        });
+      } catch (err) {
+        return { success: false, plant: targetPlant, overall: {}, dates: [], error: err.message };
+      }
+    }, 60000);
   }
 
   /**
@@ -284,6 +298,11 @@ export class ApiService {
   async createFinding({ plant, reportDate, finding, recommendation, specificLocation, riskLevel, clientOperationId }) {
     const targetPlant = plant || this.activePlant || 'CIPL';
     const targetDate = reportDate || new Date().toISOString().substring(0, 10);
+
+    // Invalidate local cache for this plant
+    redisCache.invalidatePattern(`report_info:${targetPlant}`);
+    redisCache.invalidatePattern(`report_summary:${targetPlant}`);
+    redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
 
     if (!this.isConfigured()) {
       return {
@@ -296,7 +315,7 @@ export class ApiService {
       };
     }
 
-    return this.postRequest({
+    const res = await this.postRequest({
       action: 'create_finding',
       plant: targetPlant,
       reportDate: targetDate,
@@ -306,6 +325,11 @@ export class ApiService {
       riskLevel: riskLevel || 'Priority 2',
       clientOperationId: clientOperationId || this.generateOperationId()
     });
+
+    redisCache.invalidatePattern(`report_info:${targetPlant}`);
+    redisCache.invalidatePattern(`report_summary:${targetPlant}`);
+    redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
+    return res;
   }
 
   /**
@@ -313,6 +337,11 @@ export class ApiService {
    */
   async rectifyFinding({ plant, reportDate, serial, remarks, base64Data, filename, clientOperationId }) {
     const targetPlant = plant || this.activePlant || 'CIPL';
+
+    // Invalidate local cache for this plant
+    redisCache.invalidatePattern(`report_info:${targetPlant}`);
+    redisCache.invalidatePattern(`report_summary:${targetPlant}`);
+    redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
 
     if (!this.isConfigured()) {
       return {
@@ -325,7 +354,7 @@ export class ApiService {
       };
     }
 
-    return this.postRequest({
+    const res = await this.postRequest({
       action: 'rectify_finding',
       plant: targetPlant,
       reportDate,
@@ -335,6 +364,11 @@ export class ApiService {
       filename,
       clientOperationId: clientOperationId || this.generateOperationId()
     });
+
+    redisCache.invalidatePattern(`report_info:${targetPlant}`);
+    redisCache.invalidatePattern(`report_summary:${targetPlant}`);
+    redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
+    return res;
   }
 
   /**
@@ -382,7 +416,10 @@ export class ApiService {
       idempotencyKey: clientOperationId
     };
 
-    return this.postRequest(payload);
+    const res = await this.postRequest(payload);
+    redisCache.invalidatePattern(`report_info:${targetPlant}`);
+    redisCache.invalidatePattern(`plant_reports:${targetPlant}`);
+    return res;
   }
 
   /**
@@ -445,38 +482,43 @@ export class ApiService {
   /**
    * Get cloud storage locations (Drives and Sheets)
    * ADMIN receives all locations; PLANT_USER receives their authorized plant only.
+   * Cached via redisCache with 5min TTL
    */
   async getStorageLocations() {
-    if (!this.isConfigured()) {
-      if (this.currentUser && this.currentUser.role === 'ADMIN') {
-        return { success: true, role: 'ADMIN', ...STORAGE_LOCATIONS };
-      }
-      const plant = (this.currentUser && this.currentUser.plant) || this.activePlant || 'CIPL';
-      return {
-        success: true,
-        role: 'PLANT_USER',
-        plant: STORAGE_LOCATIONS.plants[plant] || {
-          plant,
-          driveFolderUrl: '',
-          spreadsheetUrl: ''
-        }
-      };
-    }
+    const role = this.currentUser ? this.currentUser.role : 'anon';
+    const plant = (this.currentUser && this.currentUser.plant) || this.activePlant || 'CIPL';
+    const cacheKey = `storage_locations:${role}:${plant}`;
 
-    try {
-      return await this.postRequest({ action: 'get_storage_locations' });
-    } catch (e) {
-      console.warn('[ApiService] Could not fetch remote storage locations, falling back to static directory:', e.message);
-      if (this.currentUser && this.currentUser.role === 'ADMIN') {
-        return { success: true, role: 'ADMIN', ...STORAGE_LOCATIONS };
+    return redisCache.getOrFetch(cacheKey, async () => {
+      if (!this.isConfigured()) {
+        if (this.currentUser && this.currentUser.role === 'ADMIN') {
+          return { success: true, role: 'ADMIN', ...STORAGE_LOCATIONS };
+        }
+        return {
+          success: true,
+          role: 'PLANT_USER',
+          plant: STORAGE_LOCATIONS.plants[plant] || {
+            plant,
+            driveFolderUrl: '',
+            spreadsheetUrl: ''
+          }
+        };
       }
-      const plant = (this.currentUser && this.currentUser.plant) || this.activePlant || 'CIPL';
-      return {
-        success: true,
-        role: 'PLANT_USER',
-        plant: STORAGE_LOCATIONS.plants[plant]
-      };
-    }
+
+      try {
+        return await this.postRequest({ action: 'get_storage_locations' });
+      } catch (e) {
+        console.warn('[ApiService] Could not fetch remote storage locations, falling back to static directory:', e.message);
+        if (this.currentUser && this.currentUser.role === 'ADMIN') {
+          return { success: true, role: 'ADMIN', ...STORAGE_LOCATIONS };
+        }
+        return {
+          success: true,
+          role: 'PLANT_USER',
+          plant: STORAGE_LOCATIONS.plants[plant]
+        };
+      }
+    }, 300000);
   }
 
   blobToBase64(blob) {
@@ -538,3 +580,7 @@ export const STORAGE_LOCATIONS = {
 };
 
 export const apiServiceInstance = new ApiService();
+if (typeof window !== 'undefined') {
+  window.redisCache = redisCache;
+}
+export { redisCache };

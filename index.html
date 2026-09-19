@@ -423,28 +423,34 @@
               </div>
             </div>
 
+            <!-- Primary Native Phone Camera Shutter for Mobile -->
+            <div class="primary-phone-cam-banner">
+              <label for="phoneCameraInput" class="native-cam-hero-btn" title="Open Phone's Built-in Camera App">
+                <input type="file" id="phoneCameraInput" accept="image/*" capture="environment" class="sr-only">
+                <span class="icon-label">
+                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <span>Open Phone Camera (Hardware App)</span>
+                </span>
+                <small>Opens native phone camera with full sensor resolution</small>
+              </label>
+            </div>
+
             <!-- Camera & Mobile Photos Action Bar with Clean SVGs -->
             <div class="camera-actions-bar">
-              <button id="takeLivePhotoBtn" class="ms-btn-action take-photo-action" title="Snap photo from live camera feed">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>Take Photo</span>
-              </button>
-
-              <label class="ms-btn-action phone-camera-action" title="Open Native Mobile Camera">
-                <input type="file" id="phoneCameraInput" accept="image/*" capture="environment" class="sr-only">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                <span>Phone Cam</span>
-              </label>
-
               <label class="ms-btn-action gallery-upload-action" title="Upload from Mobile Photo Gallery or Local Files">
                 <input type="file" id="photoGalleryInput" accept="image/*" class="sr-only">
                 <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 <span>Mobile Photos</span>
               </label>
 
+              <button id="takeLivePhotoBtn" class="ms-btn-action" title="Snap photo from webcam feed">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Webcam Snap</span>
+              </button>
+
               <button id="switchCameraBtn" class="ms-btn-action flip-camera-action" title="Switch front/back camera">
                 <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                <span>Flip</span>
+                <span>Flip Cam</span>
               </button>
             </div>
             
@@ -678,67 +684,113 @@
 
 
     <!-- =======================================================================
-         MODAL 2: RECTIFY / CORRECTION POP-UP (Camera + Upload for Col J)
+         MODAL 2: RECTIFY / CORRECTION POP-UP (Native Camera + Uncropped Proof)
          ======================================================================= -->
     <div id="rectifyModal" class="ms-modal-backdrop hidden">
-      <div class="ms-modal" style="max-width: 540px;">
+      <div class="ms-modal rectify-modal-dialog">
         <div class="ms-modal-header">
           <h3 id="rectifyModalTitle" class="icon-label">
             <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            <span>Rectify Observation: 001</span>
+            <span>Rectify Observation</span>
           </h3>
           <button id="closeRectifyModalBtn" class="ms-modal-close">&times;</button>
         </div>
 
         <div class="ms-modal-body">
           
-          <!-- Defect Reference Header -->
-          <div class="rectify-ref-box">
-            <img id="rectifyRefThumb" src="" alt="Defect Thumb" class="rectify-ref-img">
-            <div class="rectify-ref-text">
-              <div id="rectifyRefFinding" style="font-weight: 700; font-size: 0.85rem;">Finding...</div>
-              <div id="rectifyRefLocation" style="font-size: 0.75rem; color: var(--ms-text-secondary);">Location...</div>
+          <!-- Defect Reference Inspection Card (Uncropped, crystal clear view) -->
+          <div class="rectify-ref-card">
+            <div class="rectify-ref-thumb-wrap" id="rectifyRefThumbWrap" title="Original Defect Photo">
+              <img id="rectifyRefThumb" src="" alt="Defect Photo" class="rectify-ref-img">
+              <span class="rectify-ref-expand-badge">Inspect</span>
+            </div>
+            <div class="rectify-ref-details">
+              <div class="rectify-ref-header-row">
+                <span class="rectify-sl-badge" id="rectifyRefSerialBadge">Finding #001</span>
+                <span class="risk-badge risk-med" id="rectifyRefRiskBadge">Priority 2</span>
+              </div>
+              <div id="rectifyRefFinding" class="rectify-ref-finding">Finding Description...</div>
+              <div id="rectifyRefLocation" class="rectify-ref-location">Specific Site Location...</div>
             </div>
           </div>
 
-          <!-- Camera / Upload Viewport -->
-          <div class="camera-box" id="rectifyCameraViewport" style="aspect-ratio: 1/1; max-height: 280px;">
-            <video id="rectifyCameraVideo" autoplay playsinline muted></video>
-            <img id="rectifyPreviewImg" class="active-photo-preview hidden" alt="Corrected Preview">
-            
-            <div class="reticle-1to1">
-              <span class="reticle-tag" style="background: var(--ms-success);">1:1 CORRECTED EVIDENCE</span>
-              <span class="reticle-strip-tag">+ Watermark Strip: CORRECTED 01</span>
-            </div>
+          <div class="rectify-section-title">
+            <span>Proof of Correction (Column J in Sheet):</span>
           </div>
 
-          <!-- 3 Capture / Upload Options for Rectification with Clean SVGs -->
-          <div class="camera-actions-bar">
-            <button id="rectifyTakeLiveBtn" class="ms-btn-action take-photo-action" style="background: var(--ms-success); border-color: var(--ms-success);">
-              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              <span>Snap Photo</span>
-            </button>
-
-            <label class="ms-btn-action phone-camera-action">
+          <!-- Primary Phone Camera Trigger Box (Mobile First) -->
+          <div id="rectifyCapturePrompt" class="rectify-capture-prompt">
+            <label for="rectifyPhoneCameraInput" class="native-cam-hero-btn rectify-hero-btn" title="Open Phone Camera">
               <input type="file" id="rectifyPhoneCameraInput" accept="image/*" capture="environment" class="sr-only">
-              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-              <span>Phone Cam</span>
+              <span class="icon-label">
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>Open Phone Camera</span>
+              </span>
+              <small>Opens your phone's built-in camera app for full optical quality</small>
             </label>
 
-            <label class="ms-btn-action gallery-upload-action">
-              <input type="file" id="rectifyGalleryInput" accept="image/*" class="sr-only">
-              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-              <span>Mobile Photos</span>
-            </label>
+            <div class="rectify-alt-actions">
+              <label class="ms-btn-action" style="flex: 1;" title="Choose photo from mobile gallery or file picker">
+                <input type="file" id="rectifyGalleryInput" accept="image/*" class="sr-only">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span>Gallery / Files</span>
+              </label>
 
-            <button id="rectifyFlipBtn" class="ms-btn-action">
-              <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-              <span>Flip</span>
-            </button>
+              <button id="rectifyToggleWebcamBtn" class="ms-btn-action" style="flex: 1;" type="button" title="Use PC or laptop live webcam">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Use Webcam</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Uncropped, Clear Preview Box (Shown after photo is captured/selected) -->
+          <div id="rectifyPreviewContainer" class="rectify-preview-container hidden">
+            <div class="rectify-preview-box">
+              <img id="rectifyPreviewImg" src="" alt="Corrected Proof Preview" class="rectify-preview-img">
+              <div class="reticle-1to1">
+                <span class="reticle-tag" style="background: var(--ms-success);">1:1 CORRECTED EVIDENCE</span>
+                <span class="reticle-strip-tag">+ Watermark Strip: CORRECTED 01</span>
+              </div>
+            </div>
+            
+            <div class="rectify-preview-actions">
+              <label for="rectifyRetakeInput" class="ms-btn-secondary btn-icon-wrap" style="flex: 1;" title="Retake with phone camera">
+                <input type="file" id="rectifyRetakeInput" accept="image/*" capture="environment" class="sr-only">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>Retake Photo</span>
+              </label>
+              <button id="rectifyRemovePhotoBtn" class="ms-btn-secondary" type="button" style="color: var(--ms-danger); font-size: 0.78rem;">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional Webcam Live Viewport (Hidden by default, shown only when user selects 'Use Webcam') -->
+          <div id="rectifyWebcamContainer" class="rectify-webcam-container hidden">
+            <div class="camera-box" id="rectifyCameraViewport" style="aspect-ratio: 1/1; max-height: 250px;">
+              <video id="rectifyCameraVideo" autoplay playsinline muted></video>
+              <div class="reticle-1to1">
+                <span class="reticle-tag" style="background: var(--ms-success);">1:1 WEBCAM FEED</span>
+                <span class="reticle-strip-tag">+ Watermark Strip: CORRECTED 01</span>
+              </div>
+            </div>
+            <div class="camera-actions-bar" style="margin-top: 0.5rem;">
+              <button id="rectifyTakeLiveBtn" class="ms-btn-action take-photo-action" style="background: var(--ms-success); border-color: var(--ms-success);" type="button">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Snap Photo</span>
+              </button>
+              <button id="rectifyFlipBtn" class="ms-btn-action" type="button">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>Flip</span>
+              </button>
+              <button id="rectifyCloseWebcamBtn" class="ms-btn-secondary" type="button">
+                <span>Cancel Webcam</span>
+              </button>
+            </div>
           </div>
 
           <!-- Rectification Remarks -->
-          <div class="form-field">
+          <div class="form-field" style="margin-top: 0.35rem;">
             <label for="rectifyRemarksInput" class="form-label">Rectification Action / Remarks:</label>
             <input 
               type="text" 
@@ -752,7 +804,7 @@
         </div>
 
         <div class="ms-modal-footer">
-          <button id="submitRectificationBtn" class="ms-submit-btn btn-icon-wrap" style="background-color: var(--ms-success); width: auto; min-height: 38px; padding: 0.4rem 1.25rem;">
+          <button id="submitRectificationBtn" class="ms-submit-btn btn-icon-wrap" style="background-color: var(--ms-success); width: auto; min-height: 42px; padding: 0.5rem 1.4rem;">
             <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             <span>Submit Correction (Save to Sheet Col J)</span>
           </button>
