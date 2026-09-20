@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Epic Group | Electrical Internal CAP Report Field Inspector</title>
-  
+
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
 
   <!-- =========================================================================
@@ -23,33 +26,26 @@
       </div>
 
       <div id="loginErrorAlert" class="login-error-box hidden">
-        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
         <span id="loginErrorMsg">Invalid username or password</span>
       </div>
 
       <form id="loginForm" class="login-form">
         <div class="form-field">
           <label for="usernameInput" class="form-label">Username:</label>
-          <input 
-            type="text" 
-            id="usernameInput" 
-            class="ms-input" 
-            placeholder="e.g. admin or cipl_user" 
-            autocomplete="username" 
-            required
-          >
+          <input type="text" id="usernameInput" class="ms-input" placeholder="e.g. admin or cipl_user"
+            autocomplete="username" required>
         </div>
 
         <div class="form-field">
           <label for="passwordInput" class="form-label">Password:</label>
-          <input 
-            type="password" 
-            id="passwordInput" 
-            class="ms-input" 
-            placeholder="Enter password" 
-            autocomplete="current-password" 
-            required
-          >
+          <input type="password" id="passwordInput" class="ms-input" placeholder="Enter password"
+            autocomplete="current-password" required>
         </div>
 
         <button type="submit" id="loginSubmitBtn" class="ms-submit-btn" style="margin-top: 0.5rem;">
@@ -63,31 +59,46 @@
         <div class="quick-role-chips">
           <button type="button" class="quick-role-chip" data-user="admin" data-pass="admin123">
             <span class="icon-label">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
               <span>Admin (All)</span>
             </span>
           </button>
           <button type="button" class="quick-role-chip" data-user="cipl_user" data-pass="cipl123">
             <span class="icon-label">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+              </svg>
               <span>CIPL</span>
             </span>
           </button>
           <button type="button" class="quick-role-chip" data-user="pgcl_user" data-pass="pgcl123">
             <span class="icon-label">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+              </svg>
               <span>PGCL</span>
             </span>
           </button>
           <button type="button" class="quick-role-chip" data-user="gtl_user" data-pass="gtl123">
             <span class="icon-label">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+              </svg>
               <span>GTL</span>
             </span>
           </button>
           <button type="button" class="quick-role-chip" data-user="egmcl_user" data-pass="egmcl123">
             <span class="icon-label">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+              </svg>
               <span>EGMCL 2</span>
             </span>
           </button>
@@ -105,7 +116,7 @@
        2. MAIN APP SHELL (Activated after successful sign-in)
        ========================================================================= -->
   <div id="mainAppShell" class="app-shell hidden">
-    
+
     <!-- Microsoft Enterprise Header with Epic Group Branding -->
     <header class="ms-header">
       <div class="ms-brand">
@@ -138,7 +149,11 @@
 
         <!-- User Profile Pill with SVG User Icon -->
         <div class="user-profile-pill" id="userProfilePill" title="Current Logged In User">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
           <span id="userNameDisplay" class="user-name-text">Inspector</span>
           <span id="userRoleBadge" class="role-badge">PLANT_USER</span>
         </div>
@@ -149,19 +164,33 @@
         </button>
 
         <!-- Cloud Storage Directory Trigger Button -->
-        <button id="cloudStorageHubBtn" class="storage-hub-btn btn-icon-wrap" title="Google Drive & Sheets Cloud Directory">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <button id="cloudStorageHubBtn" class="storage-hub-btn btn-icon-wrap"
+          title="Google Drive & Sheets Cloud Directory">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+          </svg>
           <span id="storageHubBtnText" class="storage-hub-text">Cloud Drives</span>
         </button>
 
         <!-- Settings Modal Trigger with SVG Gear -->
-        <button id="openSettingsBtn" class="settings-badge-btn" title="Backend Google Apps Script Settings">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <button id="openSettingsBtn" class="settings-badge-btn" title="Google Cloud Direct API Settings">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
         </button>
 
         <!-- Sign Out Button with SVG Exit Icon -->
         <button id="logoutBtn" class="logout-btn" title="Sign Out of Portal">
-          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
         </button>
       </div>
     </header>
@@ -169,30 +198,56 @@
     <!-- Navigation Tabs with Crisp SVG Icons -->
     <nav class="ms-tab-strip">
       <button class="ms-tab active" data-tab="reports">
-        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
         <span>CAP Reports</span>
         <span id="reportsCountBadge" class="tab-badge">0</span>
       </button>
 
       <button class="ms-tab" data-tab="sheet">
-        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="3" y1="15" x2="21" y2="15" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="3" x2="15" y2="21" />
+        </svg>
         <span>Full Report</span>
         <span id="sheetObsCountBadge" class="tab-badge">0</span>
       </button>
 
       <button class="ms-tab" data-tab="gallery">
-        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
+        </svg>
         <span>Photo Gallery</span>
         <span id="galleryCountBadge" class="tab-badge">0</span>
       </button>
 
       <button class="ms-tab" data-tab="capture" data-admin-only="true">
-        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
         <span>New Finding</span>
       </button>
 
       <button class="ms-tab" data-tab="drive">
-        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+        </svg>
         <span>Cloud Sync</span>
       </button>
     </nav>
@@ -205,24 +260,36 @@
            ===================================================================== -->
       <section id="reportsTab" class="tab-pane active">
         <div class="ms-section">
-          
+
           <div class="reports-hub-header">
             <div>
               <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--epic-navy);">
                 Date-Wise Electrical CAP Reports
               </h2>
               <p style="font-size: 0.8rem; color: var(--ms-text-secondary); margin-top: 0.15rem;">
-                Plant: <strong id="reportsHubPlantLabel" style="color: var(--epic-navy);">CIPL</strong> • Sourced from Google Drive & Sheets
+                Plant: <strong id="reportsHubPlantLabel" style="color: var(--epic-navy);">CIPL</strong> • Sourced from
+                Google Drive & Sheets
               </p>
             </div>
 
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button id="startNewInspectionBtn" class="ms-submit-btn btn-icon-wrap" data-admin-only="true" style="width: auto; min-height: 38px; padding: 0.4rem 1rem; font-size: 0.85rem;">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <button id="startNewInspectionBtn" class="ms-submit-btn btn-icon-wrap" data-admin-only="true"
+                style="width: auto; min-height: 38px; padding: 0.4rem 1rem; font-size: 0.85rem;">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
                 <span>New Date Inspection</span>
               </button>
-              <button id="refreshReportsHubBtn" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <button id="refreshReportsHubBtn" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 4 23 10 17 10" />
+                  <polyline points="1 20 1 14 7 14" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
                 <span>Refresh</span>
               </button>
             </div>
@@ -236,12 +303,24 @@
               <span id="bannerReportDate" class="banner-date">Date: 2026-09-19</span>
             </div>
             <div class="banner-right">
-              <button id="bannerViewSheetBtn" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.78rem; font-weight: 700;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+              <button id="bannerViewSheetBtn" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.78rem; font-weight: 700;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                </svg>
                 <span>View Full Sheet</span>
               </button>
-              <button id="bannerViewGalleryBtn" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.78rem; font-weight: 700;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <button id="bannerViewGalleryBtn" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.78rem; font-weight: 700;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
                 <span>View Gallery</span>
               </button>
             </div>
@@ -252,7 +331,8 @@
             <!-- Populated dynamically with date-wise report cards -->
           </div>
 
-          <div id="reportsGridEmpty" class="camera-offline-msg hidden" style="color: var(--ms-text-secondary); padding: 2.5rem; background: var(--ms-card-bg); border: 1px dashed var(--ms-border);">
+          <div id="reportsGridEmpty" class="camera-offline-msg hidden"
+            style="color: var(--ms-text-secondary); padding: 2.5rem; background: var(--ms-card-bg); border: 1px dashed var(--ms-border);">
             No CAP reports found for this plant. Click <strong>"New Date Inspection"</strong> to create today's report.
           </div>
 
@@ -265,8 +345,9 @@
            ===================================================================== -->
       <section id="sheetTab" class="tab-pane">
         <div class="ms-section">
-          
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; border-bottom: 1px solid var(--ms-border); padding-bottom: 0.75rem;">
+
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; border-bottom: 1px solid var(--ms-border); padding-bottom: 0.75rem;">
             <div>
               <h2 id="sheetReportTitle" style="font-size: 1.15rem; font-weight: 700; color: var(--epic-navy);">
                 CIPL - Electrical Internal CAP Report
@@ -277,20 +358,53 @@
             </div>
 
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <a id="openGoogleSheetLink" href="#" target="_blank" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.8rem; padding: 0.4rem 0.75rem; color: var(--epic-navy); font-weight: 700;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <a id="openGoogleSheetLink" href="#" target="_blank" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.8rem; padding: 0.4rem 0.75rem; color: var(--epic-navy); font-weight: 700;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
                 <span>Open in Google Sheets</span>
               </a>
-              <button id="addNewObsFromSheetBtn" class="ms-submit-btn btn-icon-wrap" data-admin-only="true" style="width: auto; min-height: 38px; padding: 0.4rem 1rem; font-size: 0.85rem;">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <button id="addNewObsFromSheetBtn" class="ms-submit-btn btn-icon-wrap"
+                style="width: auto; min-height: 38px; padding: 0.4rem 1rem; font-size: 0.85rem;">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
                 <span>Add Finding</span>
               </button>
-              <button id="exportCsvBtn" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <button id="deleteReportBtn" class="ms-btn-secondary btn-icon-wrap" data-admin-only="true"
+                style="font-size: 0.8rem; padding: 0.4rem 0.65rem; color: var(--ms-danger); border-color: rgba(168,0,0,0.3);"
+                title="Delete this entire Date Report Tab (Admin only)">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>Delete Report</span>
+              </button>
+              <button id="exportCsvBtn" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.8rem; padding: 0.4rem 0.65rem;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 <span>CSV</span>
               </button>
-              <button id="printReportBtn" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.8rem; padding: 0.4rem 0.65rem;">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <button id="printReportBtn" class="ms-btn-secondary btn-icon-wrap"
+                style="font-size: 0.8rem; padding: 0.4rem 0.65rem;">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
                 <span>Print</span>
               </button>
             </div>
@@ -352,7 +466,8 @@
             </table>
           </div>
 
-          <div id="sheetTableEmpty" class="camera-offline-msg hidden" style="color: var(--ms-text-secondary); padding: 2rem;">
+          <div id="sheetTableEmpty" class="camera-offline-msg hidden"
+            style="color: var(--ms-text-secondary); padding: 2rem;">
             No observations recorded for this report date yet. Click <strong>"Add Finding"</strong> to capture photos.
           </div>
 
@@ -365,8 +480,9 @@
            ===================================================================== -->
       <section id="galleryTab" class="tab-pane">
         <div class="ms-section">
-          
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <div>
               <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--epic-navy);">
                 Photo Evidence Gallery
@@ -378,9 +494,12 @@
 
             <!-- Gallery Filter Pills -->
             <div class="gallery-filters">
-              <button class="gallery-filter-btn active" data-filter="ALL">All Photos (<span id="galleryFilterAllCount">0</span>)</button>
-              <button class="gallery-filter-btn" data-filter="PENDING">Pending Rectification (<span id="galleryFilterPendingCount">0</span>)</button>
-              <button class="gallery-filter-btn" data-filter="RECTIFIED">Rectified (<span id="galleryFilterRectifiedCount">0</span>)</button>
+              <button class="gallery-filter-btn active" data-filter="ALL">All Photos (<span
+                  id="galleryFilterAllCount">0</span>)</button>
+              <button class="gallery-filter-btn" data-filter="PENDING">Pending Rectification (<span
+                  id="galleryFilterPendingCount">0</span>)</button>
+              <button class="gallery-filter-btn" data-filter="RECTIFIED">Rectified (<span
+                  id="galleryFilterRectifiedCount">0</span>)</button>
             </div>
           </div>
 
@@ -389,7 +508,8 @@
             <!-- Populated dynamically -->
           </div>
 
-          <div id="galleryEmpty" class="camera-offline-msg hidden" style="color: var(--ms-text-secondary); padding: 2.5rem; background: var(--ms-card-bg); border: 1px dashed var(--ms-border);">
+          <div id="galleryEmpty" class="camera-offline-msg hidden"
+            style="color: var(--ms-text-secondary); padding: 2.5rem; background: var(--ms-card-bg); border: 1px dashed var(--ms-border);">
             No photos matching this filter.
           </div>
 
@@ -402,58 +522,119 @@
            ===================================================================== -->
       <section id="captureTab" class="tab-pane">
         <div class="desktop-grid">
-          
-          <!-- Left Column: Camera Viewport & Controls -->
+
+          <!-- Left Column: Minimal Hardware Camera & Local Storage Photo Intake -->
           <div class="ms-section">
-            <div class="camera-box" id="cameraViewport">
-              <video id="cameraVideo" autoplay playsinline muted></video>
-              
-              <!-- Frozen Preview -->
-              <img id="activePhotoPreviewImg" class="active-photo-preview hidden" alt="Captured / Uploaded Preview">
 
-              <div id="cameraPlaceholder" class="camera-offline-msg hidden">
-                <p>Live camera preview inactive</p>
-                <button id="startCameraBtn" class="ms-btn-secondary" style="margin-top: 0.5rem;">Start Live Camera</button>
+            <!-- Initial Intake Prompt (Shown when no photo is yet loaded) -->
+            <div id="capturePromptBox" class="capture-prompt-card">
+              <div class="intake-header">
+                <div class="intake-badge">1:1 Pictorial Evidence Intake</div>
+                <h4 style="margin: 0.35rem 0 0.2rem 0; font-size: 0.95rem; color: var(--epic-navy); font-weight: 600;">Capture or Select Photo</h4>
+                <p style="font-size: 0.78rem; color: var(--ms-text-secondary); margin: 0;">Direct native sensor capture or upload from device storage.</p>
               </div>
 
-              <!-- 1:1 Reticle Overlay -->
-              <div class="reticle-1to1" id="cameraReticle">
-                <span class="reticle-tag" id="reticleModeTag">1:1 PICTORIAL EVIDENCE</span>
-                <span class="reticle-strip-tag">+ Bottom Watermark Strip</span>
-              </div>
-            </div>
-
-            <!-- Primary Native Phone Camera Shutter for Mobile -->
-            <div class="primary-phone-cam-banner">
+              <!-- Primary Phone Hardware Camera Button -->
               <label for="phoneCameraInput" class="native-cam-hero-btn" title="Open Phone's Built-in Camera App">
                 <input type="file" id="phoneCameraInput" accept="image/*" capture="environment" class="sr-only">
                 <span class="icon-label">
-                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                  <span>Open Phone Camera (Hardware App)</span>
+                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                  <span>Direct Phone Camera</span>
                 </span>
-                <small>Opens native phone camera with full sensor resolution</small>
+                <small>Launches hardware camera with full optical sensor resolution</small>
               </label>
+
+              <!-- Secondary Device Storage / Gallery Button -->
+              <label for="photoGalleryInput" class="device-storage-hero-btn" title="Choose photo from device local storage or gallery">
+                <input type="file" id="photoGalleryInput" accept="image/*" class="sr-only">
+                <span class="icon-label">
+                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
+                  <span>Phone Local Storage / Gallery</span>
+                </span>
+                <small>Select existing photo file from device storage</small>
+              </label>
+
+              <!-- Optional Desktop Webcam Toggle -->
+              <div style="margin-top: 0.75rem; text-align: center;">
+                <button id="toggleWebcamBtn" type="button" class="ms-btn-secondary btn-icon-wrap" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span>Use Laptop / PC Webcam</span>
+                </button>
+              </div>
             </div>
 
-            <!-- Camera & Mobile Photos Action Bar with Clean SVGs -->
-            <div class="camera-actions-bar">
-              <label class="ms-btn-action gallery-upload-action" title="Upload from Mobile Photo Gallery or Local Files">
-                <input type="file" id="photoGalleryInput" accept="image/*" class="sr-only">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                <span>Mobile Photos</span>
-              </label>
+            <!-- 1:1 Contained Preview Card (Visible once photo is captured or selected) -->
+            <div id="capturePreviewContainer" class="capture-preview-container hidden">
+              <div class="photo-preview-box" id="capturePreviewBox">
+                <img id="activePhotoPreviewImg" class="active-photo-preview hidden" alt="Captured / Uploaded Preview">
+                <div class="reticle-1to1" id="cameraReticle">
+                  <span class="reticle-tag" id="reticleModeTag">1:1 PICTORIAL EVIDENCE</span>
+                  <span class="reticle-strip-tag">+ Bottom Watermark Strip</span>
+                </div>
+              </div>
 
+              <!-- Retake / Alternate Action Bar -->
+              <div class="preview-actions-bar">
+                <label for="phoneCameraRetakeInput" class="ms-btn-secondary btn-icon-wrap" style="flex: 1;" title="Retake with Phone Camera">
+                  <input type="file" id="phoneCameraRetakeInput" accept="image/*" capture="environment" class="sr-only">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                  <span>Retake</span>
+                </label>
+
+                <label for="photoGalleryRetakeInput" class="ms-btn-secondary btn-icon-wrap" style="flex: 1;" title="Choose different file from Storage">
+                  <input type="file" id="photoGalleryRetakeInput" accept="image/*" class="sr-only">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
+                  <span>Files</span>
+                </label>
+
+                <button id="clearCapturePhotoBtn" type="button" class="ms-btn-secondary" style="color: var(--ms-danger); font-size: 0.78rem;" title="Clear Photo">
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Optional Webcam Live Viewport (Hidden unless user explicitly clicks 'Use Webcam') -->
+            <div id="cameraViewport" class="camera-box hidden" style="margin-top: 0.5rem; aspect-ratio: 1/1; max-height: 280px;">
+              <video id="cameraVideo" autoplay playsinline muted></video>
+              <div class="reticle-1to1">
+                <span class="reticle-tag">1:1 WEBCAM FEED</span>
+                <span class="reticle-strip-tag">+ Bottom Watermark Strip</span>
+              </div>
+            </div>
+            <div id="webcamControlsBar" class="camera-actions-bar hidden" style="margin-top: 0.5rem;">
               <button id="takeLivePhotoBtn" class="ms-btn-action" title="Snap photo from webcam feed">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
                 <span>Webcam Snap</span>
               </button>
-
-              <button id="switchCameraBtn" class="ms-btn-action flip-camera-action" title="Switch front/back camera">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              <button id="switchCameraBtn" class="ms-btn-action" title="Switch front/back camera">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
                 <span>Flip Cam</span>
               </button>
+              <button id="closeWebcamBtn" type="button" class="ms-btn-secondary">
+                <span>Close</span>
+              </button>
             </div>
-            
+
             <div class="action-bar-hint">
               <span>Saved into Google Drive `/CAP Photos/{Plant}/{Date}/` and Google Sheet Column G.</span>
             </div>
@@ -461,9 +642,12 @@
 
           <!-- Right Column: Observation Details & Submit Form -->
           <div class="ms-section">
-            
+
             <div id="dualSaveNotice" class="dual-save-notice hidden">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
               <span id="dualSaveNoticeText">Evidence saved locally & syncing to Google Drive / Sheets.</span>
             </div>
 
@@ -480,37 +664,23 @@
               <!-- Finding / Observation -->
               <div class="form-field">
                 <label for="findingInput" class="form-label">Finding / Observation: <span class="req">*</span></label>
-                <input 
-                  type="text" 
-                  id="findingInput" 
-                  class="ms-input" 
-                  placeholder="e.g. Loose Cable Termination at Main Busbar" 
-                  required
-                >
+                <input type="text" id="findingInput" class="ms-input"
+                  placeholder="e.g. Loose Cable Termination at Main Busbar" required>
               </div>
 
               <!-- Location / Facility -->
               <div class="form-field">
                 <label for="locationInput" class="form-label">Location / Facility: <span class="req">*</span></label>
-                <input 
-                  type="text" 
-                  id="locationInput" 
-                  class="ms-input" 
-                  placeholder="e.g. Main LT Switchgear Room" 
-                  required
-                >
+                <input type="text" id="locationInput" class="ms-input" placeholder="e.g. Main LT Switchgear Room"
+                  required>
               </div>
 
               <!-- Recommendation -->
               <div class="form-field">
                 <label for="recommendationInput" class="form-label">Recommendation:</label>
-                <input 
-                  type="text" 
-                  id="recommendationInput" 
-                  class="ms-input" 
-                  value="Immediate rectification required as per electrical safety standard" 
-                  placeholder="Required safety action"
-                >
+                <input type="text" id="recommendationInput" class="ms-input"
+                  value="Immediate rectification required as per electrical safety standard"
+                  placeholder="Required safety action">
               </div>
 
               <!-- Risk Level Priority -->
@@ -524,15 +694,25 @@
               </div>
 
               <!-- Live Filename Preview -->
-              <div class="desktop-only" style="background: #faf9f8; border: 1px solid var(--ms-border-subtle); padding: 0.65rem 0.85rem; border-radius: 2px; font-size: 0.75rem;">
-                <div style="font-weight: 600; color: var(--ms-text-secondary); margin-bottom: 0.2rem;">Target Destination:</div>
-                <div style="color: var(--ms-text-muted);">Sheet: <strong style="color: var(--epic-navy);">Column G (Pictorial Evidence)</strong></div>
-                <div style="margin-top: 0.2rem; color: var(--epic-navy); font-family: var(--font-mono); font-size: 0.7rem;" id="desktopLiveFilename">...</div>
+              <div class="desktop-only"
+                style="background: #faf9f8; border: 1px solid var(--ms-border-subtle); padding: 0.65rem 0.85rem; border-radius: 2px; font-size: 0.75rem;">
+                <div style="font-weight: 600; color: var(--ms-text-secondary); margin-bottom: 0.2rem;">Target
+                  Destination:</div>
+                <div style="color: var(--ms-text-muted);">Sheet: <strong style="color: var(--epic-navy);">Column G
+                    (Pictorial Evidence)</strong></div>
+                <div
+                  style="margin-top: 0.2rem; color: var(--epic-navy); font-family: var(--font-mono); font-size: 0.7rem;"
+                  id="desktopLiveFilename">...</div>
               </div>
 
               <!-- Primary Submit Button -->
               <button id="submitEvidenceBtn" class="ms-submit-btn btn-icon-wrap">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
                 <span>Submit (Save & Sync to Pictorial Evidence)</span>
               </button>
             </div>
@@ -551,10 +731,12 @@
           <div style="border-bottom: 1px solid var(--ms-border); padding-bottom: 0.75rem;">
             <h2 style="font-size: 1.05rem; font-weight: 600;">Google Drive & Sheets Synchronization</h2>
             <p style="font-size: 0.75rem; color: var(--ms-text-secondary); margin-top: 0.2rem;">
-              Target Google Drive: <code id="syncTargetDrivePath" style="color: var(--epic-navy); font-family: var(--font-mono);">/CAP Photos/{Plant}/{Date}/</code>
+              Target Google Drive: <code id="syncTargetDrivePath"
+                style="color: var(--epic-navy); font-family: var(--font-mono);">/CAP Photos/{Plant}/{Date}/</code>
             </p>
             <p style="font-size: 0.75rem; color: var(--ms-text-secondary);">
-              Target Google Sheet: <code id="syncTargetSheetName" style="color: var(--epic-navy); font-family: var(--font-mono);">{Plant} Workbook / {Date} Tab</code>
+              Target Google Sheet: <code id="syncTargetSheetName"
+                style="color: var(--epic-navy); font-family: var(--font-mono);">{Plant} Workbook / {Date} Tab</code>
             </p>
           </div>
 
@@ -575,12 +757,23 @@
           </div>
 
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button id="syncNowBtn" class="ms-btn-secondary btn-icon-wrap" style="border-color: var(--epic-navy); color: var(--epic-navy); font-weight: 600;">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <button id="syncNowBtn" class="ms-btn-secondary btn-icon-wrap"
+              style="border-color: var(--epic-navy); color: var(--epic-navy); font-weight: 600;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
               <span>Sync All Pending Evidence</span>
             </button>
             <button id="openBackendSettingsFromDriveBtn" class="ms-btn-secondary btn-icon-wrap">
-              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
               <span>Google Apps Script Configuration</span>
             </button>
           </div>
@@ -590,15 +783,22 @@
           </div>
 
           <!-- Cloud Storage Architecture Directory (Admin sees all; Plant user sees their own) -->
-          <div class="storage-hub-section" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--ms-border);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div class="storage-hub-section"
+            style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--ms-border);">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--epic-navy); display: flex; align-items: center; gap: 0.4rem; margin: 0;">
-                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <h3
+                  style="font-size: 0.95rem; font-weight: 700; color: var(--epic-navy); display: flex; align-items: center; gap: 0.4rem; margin: 0;">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
                   <span>Google Drive & Sheets Storage Hub</span>
                 </h3>
                 <p style="font-size: 0.75rem; color: var(--ms-text-secondary); margin: 0.2rem 0 0 0;">
-                  Public cloud storage locations. Direct links with viewing permissions (<code style="font-family: var(--font-mono); color: var(--ms-success);">ANYONE_WITH_LINK, VIEW</code>).
+                  Public cloud storage locations. Direct links with viewing permissions (<code
+                    style="font-family: var(--font-mono); color: var(--ms-success);">ANYONE_WITH_LINK, VIEW</code>).
                 </p>
               </div>
               <span id="storageScopeBadge" class="badge badge-info">ADMIN (All Plants & Drives)</span>
@@ -657,8 +857,12 @@
 
             <!-- If Rectified: Corrected Photo Preview -->
             <div id="detailRectifiedSection" class="rectified-preview-section hidden">
-              <div style="font-weight: 700; color: var(--ms-success); font-size: 0.85rem; margin-bottom: 0.3rem;" class="icon-label">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <div style="font-weight: 700; color: var(--ms-success); font-size: 0.85rem; margin-bottom: 0.3rem;"
+                class="icon-label">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 <span>Corrected Picture (Col J)</span>
               </div>
               <div class="modal-canvas-wrap">
@@ -669,12 +873,22 @@
         </div>
 
         <div class="ms-modal-footer">
-          <button id="detailModalRectifyBtn" class="ms-submit-btn rectify-action-btn btn-icon-wrap" style="width: auto; min-height: 38px; padding: 0.4rem 1.25rem;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <button id="detailModalRectifyBtn" class="ms-submit-btn rectify-action-btn btn-icon-wrap"
+            style="width: auto; min-height: 38px; padding: 0.4rem 1.25rem;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
             <span>Rectify / Correct This Observation</span>
           </button>
           <a id="detailModalDownloadLink" href="#" download="" class="ms-btn-secondary btn-icon-wrap">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
             <span>Download</span>
           </a>
           <button id="detailModalCloseBtn" class="ms-btn-secondary">Close</button>
@@ -690,14 +904,18 @@
       <div class="ms-modal rectify-modal-dialog">
         <div class="ms-modal-header">
           <h3 id="rectifyModalTitle" class="icon-label">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
             <span>Rectify Observation</span>
           </h3>
           <button id="closeRectifyModalBtn" class="ms-modal-close">&times;</button>
         </div>
 
         <div class="ms-modal-body">
-          
+
           <!-- Defect Reference Inspection Card (Uncropped, crystal clear view) -->
           <div class="rectify-ref-card">
             <div class="rectify-ref-thumb-wrap" id="rectifyRefThumbWrap" title="Original Defect Photo">
@@ -723,7 +941,11 @@
             <label for="rectifyPhoneCameraInput" class="native-cam-hero-btn rectify-hero-btn" title="Open Phone Camera">
               <input type="file" id="rectifyPhoneCameraInput" accept="image/*" capture="environment" class="sr-only">
               <span class="icon-label">
-                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
                 <span>Open Phone Camera</span>
               </span>
               <small>Opens your phone's built-in camera app for full optical quality</small>
@@ -732,12 +954,20 @@
             <div class="rectify-alt-actions">
               <label class="ms-btn-action" style="flex: 1;" title="Choose photo from mobile gallery or file picker">
                 <input type="file" id="rectifyGalleryInput" accept="image/*" class="sr-only">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
                 <span>Gallery / Files</span>
               </label>
 
-              <button id="rectifyToggleWebcamBtn" class="ms-btn-action" style="flex: 1;" type="button" title="Use PC or laptop live webcam">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              <button id="rectifyToggleWebcamBtn" class="ms-btn-action" style="flex: 1;" type="button"
+                title="Use PC or laptop live webcam">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
                 <span>Use Webcam</span>
               </button>
             </div>
@@ -752,14 +982,20 @@
                 <span class="reticle-strip-tag">+ Watermark Strip: CORRECTED 01</span>
               </div>
             </div>
-            
+
             <div class="rectify-preview-actions">
-              <label for="rectifyRetakeInput" class="ms-btn-secondary btn-icon-wrap" style="flex: 1;" title="Retake with phone camera">
+              <label for="rectifyRetakeInput" class="ms-btn-secondary btn-icon-wrap" style="flex: 1;"
+                title="Retake with phone camera">
                 <input type="file" id="rectifyRetakeInput" accept="image/*" capture="environment" class="sr-only">
-                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
                 <span>Retake Photo</span>
               </label>
-              <button id="rectifyRemovePhotoBtn" class="ms-btn-secondary" type="button" style="color: var(--ms-danger); font-size: 0.78rem;">
+              <button id="rectifyRemovePhotoBtn" class="ms-btn-secondary" type="button"
+                style="color: var(--ms-danger); font-size: 0.78rem;">
                 Clear
               </button>
             </div>
@@ -775,12 +1011,20 @@
               </div>
             </div>
             <div class="camera-actions-bar" style="margin-top: 0.5rem;">
-              <button id="rectifyTakeLiveBtn" class="ms-btn-action take-photo-action" style="background: var(--ms-success); border-color: var(--ms-success);" type="button">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              <button id="rectifyTakeLiveBtn" class="ms-btn-action take-photo-action"
+                style="background: var(--ms-success); border-color: var(--ms-success);" type="button">
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
                 <span>Snap Photo</span>
               </button>
               <button id="rectifyFlipBtn" class="ms-btn-action" type="button">
-                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
                 <span>Flip</span>
               </button>
               <button id="rectifyCloseWebcamBtn" class="ms-btn-secondary" type="button">
@@ -792,20 +1036,19 @@
           <!-- Rectification Remarks -->
           <div class="form-field" style="margin-top: 0.35rem;">
             <label for="rectifyRemarksInput" class="form-label">Rectification Action / Remarks:</label>
-            <input 
-              type="text" 
-              id="rectifyRemarksInput" 
-              class="ms-input" 
-              value="Rectified as per electrical safety standard" 
-              placeholder="Describe corrective action taken"
-            >
+            <input type="text" id="rectifyRemarksInput" class="ms-input"
+              value="Rectified as per electrical safety standard" placeholder="Describe corrective action taken">
           </div>
 
         </div>
 
         <div class="ms-modal-footer">
-          <button id="submitRectificationBtn" class="ms-submit-btn btn-icon-wrap" style="background-color: var(--ms-success); width: auto; min-height: 42px; padding: 0.5rem 1.4rem;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <button id="submitRectificationBtn" class="ms-submit-btn btn-icon-wrap"
+            style="background-color: var(--ms-success); width: auto; min-height: 42px; padding: 0.5rem 1.4rem;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             <span>Submit Correction (Save to Sheet Col J)</span>
           </button>
           <button id="cancelRectifyBtn" class="ms-btn-secondary">Cancel</button>
@@ -815,50 +1058,68 @@
 
 
     <!-- =======================================================================
-         BACKEND SETTINGS MODAL (Google Apps Script Web App Connection)
+         GOOGLE CLOUD DIRECT API SETTINGS MODAL (Sheets v4 & Drive v3)
          ======================================================================= -->
     <div id="settingsModal" class="ms-modal-backdrop hidden">
-      <div class="ms-modal">
+      <div class="ms-modal" style="max-width: 540px;">
         <div class="ms-modal-header">
-          <h3>Backend Google Apps Script Configuration</h3>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="color: var(--ms-primary);">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <h3 style="margin: 0; font-size: 1rem;">Google Cloud Direct API Configuration</h3>
+          </div>
           <button id="closeSettingsBtn" class="ms-modal-close">&times;</button>
         </div>
 
         <div class="ms-modal-body">
-          <p style="font-size: 0.8rem; color: var(--ms-text-secondary);">
-            Connect directly to Google Drive and Google Sheets via your deployed Google Apps Script Web App.
-          </p>
+          <div style="background: rgba(0, 120, 212, 0.08); border-left: 3px solid var(--ms-primary); padding: 0.6rem 0.75rem; border-radius: 2px; margin-bottom: 0.75rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: var(--epic-navy); margin-bottom: 0.2rem;">
+              Direct Cloud REST Architecture (No Apps Script)
+            </div>
+            <p style="font-size: 0.75rem; color: var(--ms-text-secondary); margin: 0;">
+              Communicating directly with <strong>Google Sheets API v4</strong> and <strong>Google Drive API v3</strong> for 10x faster performance (~150ms).
+            </p>
+          </div>
 
           <div class="form-field">
-            <label for="gasUrlInput" class="form-label">Google Apps Script Web App URL:</label>
-            <input 
-              type="url" 
-              id="gasUrlInput" 
-              class="ms-input" 
-              placeholder="https://script.google.com/macros/s/.../exec"
-            >
-            <span style="font-size: 0.7rem; color: var(--ms-text-muted);">
-              Deployed from <code>backend/Code.gs</code>.
+            <label class="form-label">Authorized Google Service Account:</label>
+            <div style="display: flex; align-items: center; gap: 0.4rem; background: var(--ms-bg); padding: 0.4rem 0.6rem; border: 1px solid var(--ms-border); border-radius: 2px;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--ms-success);">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <code id="serviceAccountEmailDisplay" style="font-size: 0.75rem; color: var(--epic-navy); font-weight: 600; flex: 1; word-break: break-all;">photo-75@photo-logger-506516.iam.gserviceaccount.com</code>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--ms-text-muted); margin-top: 0.2rem; display: block;">
+              Ensure your Root Drive Folder and Spreadsheets are shared with this email as <strong>Editor</strong>.
             </span>
           </div>
 
-          <div id="connectionStatusBox" style="font-size: 0.75rem; padding: 0.5rem; background: var(--ms-bg); border: 1px solid var(--ms-border); border-radius: 2px;">
-            Status: <span id="connectionStatusText">Not tested</span>
+          <div id="connectionStatusBox"
+            style="font-size: 0.75rem; padding: 0.6rem; background: var(--ms-bg); border: 1px solid var(--ms-border); border-radius: 2px; margin-top: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Status: <strong id="connectionStatusText">Ready</strong></span>
+              <span id="connectionLatencyBadge" style="font-size: 0.7rem; color: var(--ms-text-muted);"></span>
+            </div>
+            <div id="connectionDetailText" style="margin-top: 0.3rem; font-size: 0.7rem; color: var(--ms-text-secondary);"></div>
           </div>
 
-          <div style="display: flex; gap: 0.5rem;">
-            <button id="testConnectionBtn" class="ms-btn-secondary" style="flex: 1; font-size: 0.75rem;">
-              Test Connection
-            </button>
-            <button id="initSheetsBtn" class="ms-btn-secondary" style="flex: 1; font-size: 0.75rem;">
-              Initialize Sheets
+          <div style="margin-top: 0.75rem;">
+            <button id="testConnectionBtn" class="ms-btn-action" style="width: 100%; font-size: 0.8rem; justify-content: center;">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <span>Test Direct Google API Speed & Health</span>
             </button>
           </div>
         </div>
 
         <div class="ms-modal-footer">
-          <button id="saveSettingsBtn" class="ms-submit-btn" style="width: auto; min-height: 38px; padding: 0.4rem 1rem;">
-            Save Settings
+          <button id="saveSettingsBtn" class="ms-submit-btn"
+            style="width: auto; min-height: 36px; padding: 0.4rem 1.2rem;">
+            Done
           </button>
         </div>
       </div>
@@ -871,10 +1132,14 @@
       <div class="ms-modal" style="max-width: 680px;">
         <div class="ms-modal-header">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
             <div>
               <h3 style="margin: 0; font-size: 1rem; color: var(--epic-navy);">Google Drive & Sheets Storage Hub</h3>
-              <p style="margin: 0.1rem 0 0 0; font-size: 0.75rem; color: var(--ms-text-secondary);">Direct links to cloud storage destinations where data is saved</p>
+              <p style="margin: 0.1rem 0 0 0; font-size: 0.75rem; color: var(--ms-text-secondary);">Direct links to
+                cloud storage destinations where data is saved</p>
             </div>
           </div>
           <button id="closeStorageModalBtn" class="ms-modal-close">&times;</button>
@@ -887,11 +1152,74 @@
         </div>
 
         <div class="ms-modal-footer" style="justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-          <span style="font-size: 0.75rem; color: var(--ms-text-secondary); display: flex; align-items: center; gap: 0.35rem;">
-            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--ms-success);"><polyline points="20 6 9 17 4 12"/></svg>
+          <span
+            style="font-size: 0.75rem; color: var(--ms-text-secondary); display: flex; align-items: center; gap: 0.35rem;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="color: var(--ms-success);">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             <span>Public viewing link enabled for all drives & workbooks</span>
           </span>
-          <button id="doneStorageModalBtn" class="ms-submit-btn" style="width: auto; min-height: 36px; padding: 0.3rem 1.25rem;">Close Hub</button>
+          <button id="doneStorageModalBtn" class="ms-submit-btn"
+            style="width: auto; min-height: 36px; padding: 0.3rem 1.25rem;">Close Hub</button>
+        </div>
+      </div>
+    <!-- =======================================================================
+         MODAL: EDIT FINDING DIALOG (Admin Only)
+         ======================================================================= -->
+    <div id="editFindingModal" class="ms-modal-backdrop hidden">
+      <div class="ms-modal" style="max-width: 540px;">
+        <div class="ms-modal-header">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="color: var(--ms-primary);">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            <h3 id="editFindingModalTitle" style="margin: 0; font-size: 1rem; color: var(--epic-navy);">Edit Finding</h3>
+          </div>
+          <button id="closeEditFindingModalBtn" class="ms-modal-close">&times;</button>
+        </div>
+
+        <div class="ms-modal-body">
+          <input type="hidden" id="editFindingRowNumber">
+          <input type="hidden" id="editFindingSerial">
+
+          <div class="form-field">
+            <label for="editFindingInput" class="form-label">Finding / Observation: <span class="req">*</span></label>
+            <input type="text" id="editFindingInput" class="ms-input" required>
+          </div>
+
+          <div class="form-field">
+            <label for="editLocationInput" class="form-label">Location / Specific Facility: <span class="req">*</span></label>
+            <input type="text" id="editLocationInput" class="ms-input" required>
+          </div>
+
+          <div class="form-field">
+            <label for="editRecommendationInput" class="form-label">Recommendation:</label>
+            <input type="text" id="editRecommendationInput" class="ms-input">
+          </div>
+
+          <div class="form-field">
+            <label for="editRiskLevelSelect" class="form-label">Risk Level:</label>
+            <select id="editRiskLevelSelect" class="ms-input">
+              <option value="Priority 1">Priority 1 (High - 7 Days)</option>
+              <option value="Priority 2">Priority 2 (Medium - 4 Days)</option>
+              <option value="Priority 3">Priority 3 (Low - 3 Days)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ms-modal-footer">
+          <button id="saveEditFindingBtn" class="ms-submit-btn btn-icon-wrap"
+            style="width: auto; min-height: 38px; padding: 0.4rem 1.35rem;">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Save Changes to Sheet</span>
+          </button>
+          <button id="cancelEditFindingBtn" class="ms-btn-secondary">Cancel</button>
         </div>
       </div>
     </div>
@@ -900,4 +1228,5 @@
 
   <script type="module" src="./js/app.js"></script>
 </body>
+
 </html>

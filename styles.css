@@ -1186,6 +1186,113 @@ body.role-plant-user .role-badge {
   font-weight: 400;
 }
 
+/* Minimal Photo Intake Card */
+.capture-prompt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  background: var(--ms-card-bg);
+  border: 1px solid var(--ms-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.intake-header {
+  margin-bottom: 0.25rem;
+}
+
+.intake-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 2px;
+  background: rgba(0, 120, 212, 0.1);
+  color: var(--ms-primary);
+  margin-bottom: 0.35rem;
+}
+
+.device-storage-hero-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid var(--ms-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--ms-text-primary);
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.device-storage-hero-btn:hover {
+  background: #f8fafc;
+  border-color: var(--ms-primary);
+  color: var(--ms-primary);
+}
+
+.device-storage-hero-btn span {
+  font-size: 0.92rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.device-storage-hero-btn small {
+  font-size: 0.72rem;
+  color: var(--ms-text-secondary);
+}
+
+/* 1:1 Contained Preview */
+.capture-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.photo-preview-box {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(360px, 44vh);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background: #0b0f19;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ms-border);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+.photo-preview-box img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.preview-actions-bar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
 .camera-offline-msg {
   color: #ffffff;
   text-align: center;
@@ -1434,6 +1541,60 @@ body.role-plant-user .role-badge {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+}
+
+/* 1:1 Complete Contained Modal Image (No vertical scrolling needed!) */
+.modal-canvas-wrap {
+  width: 100%;
+  max-width: 420px;
+  max-height: min(380px, 45vh);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background: #0b0f19;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ms-border);
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+.modal-canvas-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Action buttons in Table (Classical Robust Enterprise UI) */
+.inspect-row-btn {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.45rem;
+}
+
+.edit-row-btn {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.45rem;
+  color: var(--ms-primary);
+  border-color: rgba(0, 120, 212, 0.35);
+}
+.edit-row-btn:hover {
+  background: rgba(0, 120, 212, 0.08);
+  border-color: var(--ms-primary);
+}
+
+.delete-row-btn {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.45rem;
+  color: var(--ms-danger) !important;
+  border-color: rgba(168, 0, 0, 0.35) !important;
+}
+.delete-row-btn:hover {
+  background: rgba(168, 0, 0, 0.08) !important;
+  border-color: var(--ms-danger) !important;
 }
 
 /* Rectification Modal & Inspection Card */

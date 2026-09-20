@@ -1,7 +1,15 @@
 /**
  * ============================================================================
- * Electrical Internal CAP Report - Production Google Apps Script Backend
+ * [RETIRED / DEPRECATED] - Electrical Internal CAP Report Apps Script Backend
  * ============================================================================
+ * NOTICE: Google Apps Script is NO LONGER REQUIRED OR USED.
+ * The application has migrated to DIRECT communication with Google Sheets API v4
+ * and Google Drive API v3 via js/googleApiService.js and vite.config.js middleware.
+ * 
+ * Do NOT deploy or execute Code.gs anymore.
+ * All operations are performed directly from the client via official Google REST APIs.
+ * ============================================================================
+ */
  * 
  * Architecture: ONE workbook per plant with date-wise tabs (YYYY-MM-DD)
  * 
@@ -51,6 +59,63 @@ const CONFIG = {
   // CAP Report A-K headers (Row 3 in each date tab)
   CAP_HEADERS: ["Sl", "Findings / Issues", "Recommendation", "Specific Location", "Risk Level", "General Location", "Pictorial Evidence", "Responsible", "Deadline", "Corrected Pictures", "Remarks"]
 };
+
+/**
+ * Resolves configuration dynamically:
+ * 1. Base default CONFIG (authoritative memo.md links)
+ * 2. ScriptProperties (persistent overrides stored in Google Apps Script)
+ * 3. Incoming Request Payload (passed dynamically by frontend)
+ * 
+ * This completely eliminates the need to manually edit or redeploy Code.gs
+ * when plant workbooks, drive folders, or settings change!
+ */
+function getDynamicConfig(payload) {
+  const cfg = {
+    MASTER_SPREADSHEET_ID: CONFIG.MASTER_SPREADSHEET_ID,
+    CAP_PHOTO_ROOT_FOLDER_ID: CONFIG.CAP_PHOTO_ROOT_FOLDER_ID,
+    PLANT_SPREADSHEETS: Object.assign({}, CONFIG.PLANT_SPREADSHEETS),
+    PLANTS: Object.assign({}, CONFIG.PLANTS),
+    RISK_DEADLINE_MAP: Object.assign({}, CONFIG.RISK_DEADLINE_MAP),
+    TIMEZONE: CONFIG.TIMEZONE,
+    SESSION_TTL_SECONDS: CONFIG.SESSION_TTL_SECONDS,
+    CAP_HEADERS: CONFIG.CAP_HEADERS
+  };
+
+  // 1. ScriptProperties persistent cloud settings
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const stored = props.getProperty("CAP_DYNAMIC_CONFIG");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.MASTER_SPREADSHEET_ID) cfg.MASTER_SPREADSHEET_ID = parsed.MASTER_SPREADSHEET_ID;
+      if (parsed.CAP_PHOTO_ROOT_FOLDER_ID) cfg.CAP_PHOTO_ROOT_FOLDER_ID = parsed.CAP_PHOTO_ROOT_FOLDER_ID;
+      if (parsed.PLANT_SPREADSHEETS) Object.assign(cfg.PLANT_SPREADSHEETS, parsed.PLANT_SPREADSHEETS);
+      if (parsed.PLANTS) Object.assign(cfg.PLANTS, parsed.PLANTS);
+    }
+  } catch (e) {
+    console.warn("ScriptProperties config read note:", e.message);
+  }
+
+  // 2. Request payload override passed directly from frontend
+  if (payload) {
+    if (payload.masterSpreadsheetId) cfg.MASTER_SPREADSHEET_ID = String(payload.masterSpreadsheetId).trim();
+    if (payload.capPhotoRootFolderId) cfg.CAP_PHOTO_ROOT_FOLDER_ID = String(payload.capPhotoRootFolderId).trim();
+    if (payload.plantSpreadsheets && typeof payload.plantSpreadsheets === 'object') {
+      Object.assign(cfg.PLANT_SPREADSHEETS, payload.plantSpreadsheets);
+    }
+    if (payload.plantFolders && typeof payload.plantFolders === 'object') {
+      Object.assign(cfg.PLANTS, payload.plantFolders);
+    }
+    if (payload.plant && payload.spreadsheetId) {
+      cfg.PLANT_SPREADSHEETS[payload.plant] = String(payload.spreadsheetId).trim();
+    }
+    if (payload.plant && payload.driveFolderId) {
+      cfg.PLANTS[payload.plant] = String(payload.driveFolderId).trim();
+    }
+  }
+
+  return cfg;
+}
 
 /**
  * ============================================================================
@@ -210,6 +275,12 @@ function doPost(e) {
 
       case "get_storage_locations":
         return handleGetStorageLocations(payload);
+
+      case "get_system_config":
+        return handleGetSystemConfig(payload);
+
+      case "update_system_config":
+        return handleUpdateSystemConfig(payload);
 
       case "write_log":
         return handleWriteLog(payload);
@@ -394,10 +465,11 @@ function getActiveUserFromMaster(username) {
   throw new Error("User account no longer exists.");
 }
 
-function normalizePlantName(plant) {
+function normalizePlantName(plant, payload = null) {
   const raw = String(plant || "").trim();
   if (!raw) return "";
-  if (CONFIG.PLANT_SPREADSHEETS[raw] || raw === "ALL") return raw;
+  const cfg = getDynamicConfig(payload);
+  if (cfg.PLANT_SPREADSHEETS[raw] || raw === "ALL") return raw;
 
   const canonical = raw.toUpperCase().replace(/\s+/g, " ");
   if (canonical === "CIPL") return "CIPL";
@@ -407,17 +479,18 @@ function normalizePlantName(plant) {
     return "EGMCL 2";
   }
 
-  for (const key of Object.keys(CONFIG.PLANT_SPREADSHEETS)) {
+  for (const key of Object.keys(cfg.PLANT_SPREADSHEETS)) {
     if (key.toUpperCase() === canonical) return key;
   }
   return "";
 }
 
 function resolveAuthorizedPlant(payload, session) {
-  const requestedPlant = normalizePlantName(payload.plant);
+  const cfg = getDynamicConfig(payload);
+  const requestedPlant = normalizePlantName(payload.plant, payload);
 
   if (session.role === "ADMIN") {
-    if (!requestedPlant || !CONFIG.PLANT_SPREADSHEETS[requestedPlant]) {
+    if (!requestedPlant || !cfg.PLANT_SPREADSHEETS[requestedPlant]) {
       throw new Error("Invalid plant: " + (payload.plant || ""));
     }
     return requestedPlant;
@@ -427,8 +500,8 @@ function resolveAuthorizedPlant(payload, session) {
     throw new Error("Unauthorized role: " + session.role);
   }
 
-  const assignedPlant = normalizePlantName(session.plant);
-  if (!assignedPlant || !CONFIG.PLANT_SPREADSHEETS[assignedPlant]) {
+  const assignedPlant = normalizePlantName(session.plant, payload);
+  if (!assignedPlant || !cfg.PLANT_SPREADSHEETS[assignedPlant]) {
     throw new Error("User is not assigned to a valid plant.");
   }
 
@@ -464,9 +537,12 @@ function requireAdmin(session) {
 
 /**
  * Open the plant workbook by plant name
+ * Dynamically resolves from payload, ScriptProperties, or default config
  */
-function openPlantWorkbook(plant) {
-  const sheetId = CONFIG.PLANT_SPREADSHEETS[plant];
+function openPlantWorkbook(plant, payload = null) {
+  const cfg = getDynamicConfig(payload);
+  const explicitId = payload && (payload.spreadsheetId || payload.sheetId || (payload.plantSpreadsheets && payload.plantSpreadsheets[plant]));
+  const sheetId = explicitId || cfg.PLANT_SPREADSHEETS[plant];
   if (!sheetId) {
     throw new Error("No workbook configured for plant: " + plant);
   }
@@ -656,7 +732,7 @@ function handleEnsurePlantReport(payload) {
   const plant = resolveAuthorizedPlant(payload, session);
   const reportDate = payload.reportDate || Utilities.formatDate(new Date(), CONFIG.TIMEZONE, "yyyy-MM-dd");
 
-  const workbook = openPlantWorkbook(plant);
+  const workbook = openPlantWorkbook(plant, payload);
   const result = ensureDateTab(workbook, reportDate, plant);
 
   // Ensure SUMMARY exists
@@ -693,7 +769,7 @@ function handleListPlantReports(payload) {
   const session = validateSession(payload);
   const plant = resolveAuthorizedPlant(payload, session);
 
-  const workbook = openPlantWorkbook(plant);
+  const workbook = openPlantWorkbook(plant, payload);
   const sheets = workbook.getSheets();
   const reports = [];
 
@@ -753,16 +829,17 @@ function handleListPlantReports(payload) {
  */
 function handleListAuthorizedPlants(payload) {
   const session = validateSession(payload);
+  const cfg = getDynamicConfig(payload);
 
   if (session.role === "ADMIN") {
     return createJsonResponse({
       success: true,
-      plants: Object.keys(CONFIG.PLANT_SPREADSHEETS)
+      plants: Object.keys(cfg.PLANT_SPREADSHEETS)
     });
   }
 
-  const assignedPlant = normalizePlantName(session.plant);
-  if (assignedPlant && CONFIG.PLANT_SPREADSHEETS[assignedPlant]) {
+  const assignedPlant = normalizePlantName(session.plant, payload);
+  if (assignedPlant && cfg.PLANT_SPREADSHEETS[assignedPlant]) {
     return createJsonResponse({
       success: true,
       plants: [assignedPlant]
@@ -782,7 +859,7 @@ function handleGetPlantReportInfo(payload) {
   const plant = resolveAuthorizedPlant(payload, session);
   const reportDate = payload.reportDate || Utilities.formatDate(new Date(), CONFIG.TIMEZONE, "yyyy-MM-dd");
 
-  const workbook = openPlantWorkbook(plant);
+  const workbook = openPlantWorkbook(plant, payload);
   const tab = workbook.getSheetByName(reportDate);
 
   if (!tab) {
@@ -860,7 +937,7 @@ function handleGetReportSummary(payload) {
   const session = validateSession(payload);
   const plant = resolveAuthorizedPlant(payload, session);
 
-  const workbook = openPlantWorkbook(plant);
+  const workbook = openPlantWorkbook(plant, payload);
   refreshSummaryTab(workbook, plant);
 
   const summary = workbook.getSheetByName("SUMMARY");
@@ -914,7 +991,8 @@ function handleCreateFinding(payload) {
   const session = validateSession(payload);
   requireAdmin(session);
   const plant = resolveAuthorizedPlant(payload, session);
-  const reportDate = payload.reportDate || Utilities.formatDate(new Date(), CONFIG.TIMEZONE, "yyyy-MM-dd");
+  const cfg = getDynamicConfig(payload);
+  const reportDate = payload.reportDate || Utilities.formatDate(new Date(), cfg.TIMEZONE, "yyyy-MM-dd");
 
   const clientOperationId = payload.clientOperationId || "";
 
@@ -931,7 +1009,7 @@ function handleCreateFinding(payload) {
     }
   }
 
-  const workbook = openPlantWorkbook(plant);
+  const workbook = openPlantWorkbook(plant, payload);
   const { tab } = ensureDateTab(workbook, reportDate, plant);
 
   // Find next empty row (Row 4+)
@@ -944,7 +1022,7 @@ function handleCreateFinding(payload) {
   const recommendation = payload.recommendation || "Immediate rectification required as per electrical safety standard";
   const location = payload.specificLocation || payload.location || "";
   const riskLevel = payload.riskLevel || "Priority 2";
-  const deadline = CONFIG.RISK_DEADLINE_MAP[riskLevel] || "7 Days";
+  const deadline = cfg.RISK_DEADLINE_MAP[riskLevel] || "7 Days";
 
   // Write A-K
   tab.getRange(targetRow, 1).setFormula("=ROW()-3");  // A: Sl

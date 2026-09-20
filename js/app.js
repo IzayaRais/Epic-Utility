@@ -85,6 +85,7 @@ class EpicCAPApp {
       sheetReportDateText: document.getElementById('sheetReportDateText'),
       openGoogleSheetLink: document.getElementById('openGoogleSheetLink'),
       addNewObsFromSheetBtn: document.getElementById('addNewObsFromSheetBtn'),
+      deleteReportBtn: document.getElementById('deleteReportBtn'),
       exportCsvBtn: document.getElementById('exportCsvBtn'),
       printReportBtn: document.getElementById('printReportBtn'),
       kpiTotalCount: document.getElementById('kpiTotalCount'),
@@ -104,15 +105,22 @@ class EpicCAPApp {
       galleryGrid: document.getElementById('galleryGrid'),
       galleryEmpty: document.getElementById('galleryEmpty'),
 
-      // TAB 4: Capture New Observation
-      cameraVideo: document.getElementById('cameraVideo'),
-      activePhotoPreviewImg: document.getElementById('activePhotoPreviewImg'),
-      cameraPlaceholder: document.getElementById('cameraPlaceholder'),
-      startCameraBtn: document.getElementById('startCameraBtn'),
-      cameraViewport: document.getElementById('cameraViewport'),
-      takeLivePhotoBtn: document.getElementById('takeLivePhotoBtn'),
+      // TAB 4: Capture New Observation (Minimal Photo Intake)
+      capturePromptBox: document.getElementById('capturePromptBox'),
+      capturePreviewContainer: document.getElementById('capturePreviewContainer'),
+      capturePreviewBox: document.getElementById('capturePreviewBox'),
       phoneCameraInput: document.getElementById('phoneCameraInput'),
       photoGalleryInput: document.getElementById('photoGalleryInput'),
+      phoneCameraRetakeInput: document.getElementById('phoneCameraRetakeInput'),
+      photoGalleryRetakeInput: document.getElementById('photoGalleryRetakeInput'),
+      clearCapturePhotoBtn: document.getElementById('clearCapturePhotoBtn'),
+      toggleWebcamBtn: document.getElementById('toggleWebcamBtn'),
+      webcamControlsBar: document.getElementById('webcamControlsBar'),
+      closeWebcamBtn: document.getElementById('closeWebcamBtn'),
+      cameraViewport: document.getElementById('cameraViewport'),
+      cameraVideo: document.getElementById('cameraVideo'),
+      activePhotoPreviewImg: document.getElementById('activePhotoPreviewImg'),
+      takeLivePhotoBtn: document.getElementById('takeLivePhotoBtn'),
       switchCameraBtn: document.getElementById('switchCameraBtn'),
       currentSerialDisplay: document.getElementById('currentSerialDisplay'),
       findingInput: document.getElementById('findingInput'),
@@ -178,14 +186,28 @@ class EpicCAPApp {
       rectifyRemarksInput: document.getElementById('rectifyRemarksInput'),
       submitRectificationBtn: document.getElementById('submitRectificationBtn'),
 
+      // MODAL: Edit Finding Modal (Admin)
+      editFindingModal: document.getElementById('editFindingModal'),
+      editFindingModalTitle: document.getElementById('editFindingModalTitle'),
+      closeEditFindingModalBtn: document.getElementById('closeEditFindingModalBtn'),
+      cancelEditFindingBtn: document.getElementById('cancelEditFindingBtn'),
+      saveEditFindingBtn: document.getElementById('saveEditFindingBtn'),
+      editFindingRowNumber: document.getElementById('editFindingRowNumber'),
+      editFindingSerial: document.getElementById('editFindingSerial'),
+      editFindingInput: document.getElementById('editFindingInput'),
+      editLocationInput: document.getElementById('editLocationInput'),
+      editRecommendationInput: document.getElementById('editRecommendationInput'),
+      editRiskLevelSelect: document.getElementById('editRiskLevelSelect'),
+
       // Settings Modal
       settingsModal: document.getElementById('settingsModal'),
       closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-      gasUrlInput: document.getElementById('gasUrlInput'),
       connectionStatusBox: document.getElementById('connectionStatusBox'),
       connectionStatusText: document.getElementById('connectionStatusText'),
+      connectionLatencyBadge: document.getElementById('connectionLatencyBadge'),
+      connectionDetailText: document.getElementById('connectionDetailText'),
+      serviceAccountEmailDisplay: document.getElementById('serviceAccountEmailDisplay'),
       testConnectionBtn: document.getElementById('testConnectionBtn'),
-      initSheetsBtn: document.getElementById('initSheetsBtn'),
       saveSettingsBtn: document.getElementById('saveSettingsBtn'),
 
       // Cloud Storage Hub Directory & Modal
@@ -246,6 +268,7 @@ class EpicCAPApp {
       this.dom.plantSelector.value = apiServiceInstance.getActivePlant() || 'CIPL';
       this.activePlant = this.dom.plantSelector.value;
       if (this.dom.storageHubBtnText) this.dom.storageHubBtnText.textContent = 'Cloud Drives';
+      if (this.dom.deleteReportBtn) this.dom.deleteReportBtn.classList.remove('hidden');
     } else {
       document.body.classList.remove('role-admin');
       document.body.classList.add('role-plant-user');
@@ -255,6 +278,7 @@ class EpicCAPApp {
       this.activePlant = user.plant;
       apiServiceInstance.setActivePlant(user.plant);
       if (this.dom.storageHubBtnText) this.dom.storageHubBtnText.textContent = `${user.plant} Drive`;
+      if (this.dom.deleteReportBtn) this.dom.deleteReportBtn.classList.add('hidden');
     }
 
     this.dom.reportsHubPlantLabel.textContent = this.activePlant;
@@ -550,6 +574,7 @@ class EpicCAPApp {
         const isRect = String(r.remarks).toLowerCase().indexOf('rectified') !== -1 && String(r.remarks).toLowerCase().indexOf('not') === -1;
         obsMap.set(s, {
           serial: s,
+          rowNumber: r.rowNumber || (parseInt(s, 10) + 3),
           findings: r.finding,
           recommendation: r.recommendation || 'Immediate rectification required as per electrical safety standard',
           location: r.location,
@@ -574,6 +599,7 @@ class EpicCAPApp {
           const s = formatSerial(p.serial);
           const existing = obsMap.get(s) || {
             serial: s,
+            rowNumber: (parseInt(s, 10) || 1) + 3,
             findings: p.findings,
             recommendation: p.recommendation || 'Immediate rectification required as per electrical safety standard',
             location: p.location,
@@ -697,6 +723,7 @@ class EpicCAPApp {
       const deadline = obs.deadline || (obs.riskLevel === 'Priority 1' ? '7 Days' : obs.riskLevel === 'Priority 3' ? '3 Days' : '4 Days');
       const responsible = obs.responsible || 'Utility In-Charge';
       const genLoc = obs.generalLocation || this.activePlant;
+      const isAdmin = this.currentUser && this.currentUser.role === 'ADMIN';
 
       tr.innerHTML = `
         <td style="font-family: var(--font-mono); font-weight: 700; text-align: center;">${obs.serial}</td>
@@ -715,7 +742,7 @@ class EpicCAPApp {
           </span>
         </td>
         <td style="text-align: center;">
-          <div style="display: flex; gap: 0.25rem; justify-content: center; align-items: center;">
+          <div style="display: flex; gap: 0.25rem; justify-content: center; align-items: center; flex-wrap: wrap;">
             <button class="ms-btn-secondary inspect-row-btn btn-icon-wrap" style="font-size: 0.72rem; padding: 0.25rem 0.45rem;" title="View Details">
               ${ICONS.eye}
               <span>View</span>
@@ -724,6 +751,16 @@ class EpicCAPApp {
               <button class="ms-btn-secondary rectify-table-btn btn-icon-wrap" style="font-size: 0.72rem; padding: 0.25rem 0.45rem; background: #ffb900; color: #000; font-weight: 700;" title="Rectify Finding">
                 ${ICONS.rectify}
                 <span>Rectify</span>
+              </button>
+            ` : ''}
+            ${isAdmin ? `
+              <button class="ms-btn-secondary edit-row-btn btn-icon-wrap" title="Edit Finding">
+                ${ICONS.edit}
+                <span>Edit</span>
+              </button>
+              <button class="ms-btn-secondary delete-row-btn btn-icon-wrap" title="Delete Row">
+                ${ICONS.trash}
+                <span>Delete</span>
               </button>
             ` : ''}
           </div>
@@ -739,6 +776,12 @@ class EpicCAPApp {
 
       const rectBtn = tr.querySelector('.rectify-table-btn');
       if (rectBtn) rectBtn.addEventListener('click', () => this.openRectifyModal(obs));
+
+      const editBtn = tr.querySelector('.edit-row-btn');
+      if (editBtn) editBtn.addEventListener('click', () => this.openEditFindingModal(obs));
+
+      const delBtn = tr.querySelector('.delete-row-btn');
+      if (delBtn) delBtn.addEventListener('click', () => this.handleDeleteFinding(obs));
 
       tr.querySelector('.inspect-row-btn').addEventListener('click', () => this.openPhotoDetail(obs));
 
@@ -1046,6 +1089,133 @@ class EpicCAPApp {
   }
 
   /* ==========================================================================
+     5b. ADMIN FINDINGS & REPORT MANAGEMENT (Edit, Delete Finding, Delete Report)
+     ========================================================================== */
+
+  openEditFindingModal(obs) {
+    if (!this.currentUser || this.currentUser.role !== 'ADMIN') {
+      this.showToast('Permission denied: Only ADMIN can edit findings.');
+      return;
+    }
+    if (!obs) return;
+
+    this.dom.editFindingRowNumber.value = obs.rowNumber || (parseInt(obs.serial, 10) + 3);
+    this.dom.editFindingSerial.value = obs.serial;
+    this.dom.editFindingModalTitle.textContent = `Edit Finding #${obs.serial} (${this.activePlant} - ${this.activeReportDate})`;
+    this.dom.editFindingInput.value = obs.findings || obs.finding || '';
+    this.dom.editLocationInput.value = obs.location || '';
+    this.dom.editRecommendationInput.value = obs.recommendation || '';
+    this.dom.editRiskLevelSelect.value = obs.riskLevel || 'Priority 2';
+
+    this.dom.editFindingModal.classList.remove('hidden');
+  }
+
+  closeEditFindingModal() {
+    this.dom.editFindingModal.classList.add('hidden');
+  }
+
+  async handleSaveEditFinding() {
+    if (!this.currentUser || this.currentUser.role !== 'ADMIN') {
+      this.showToast('Permission denied: Only ADMIN can edit findings.');
+      return;
+    }
+
+    const rowNumber = parseInt(this.dom.editFindingRowNumber.value, 10);
+    const serial = this.dom.editFindingSerial.value;
+    const finding = (this.dom.editFindingInput.value || '').trim();
+    const location = (this.dom.editLocationInput.value || '').trim();
+    const recommendation = (this.dom.editRecommendationInput.value || '').trim();
+    const riskLevel = this.dom.editRiskLevelSelect.value || 'Priority 2';
+
+    if (!finding) {
+      this.showToast('Please enter Finding / Observation.');
+      this.dom.editFindingInput.focus();
+      return;
+    }
+    if (!location) {
+      this.showToast('Please enter Location / Facility.');
+      this.dom.editLocationInput.focus();
+      return;
+    }
+
+    try {
+      this.dom.saveEditFindingBtn.disabled = true;
+      this.dom.saveEditFindingBtn.innerHTML = `<span class="icon-label">${ICONS.refresh} <span>Saving to Sheet...</span></span>`;
+
+      await apiServiceInstance.updateFinding(this.activePlant, this.activeReportDate, rowNumber, {
+        finding,
+        recommendation,
+        location,
+        riskLevel
+      });
+
+      this.showToast(`Finding #${serial} updated in Google Sheet.`);
+      this.closeEditFindingModal();
+      await this.loadSheetReport(this.activePlant, this.activeReportDate);
+    } catch (err) {
+      console.error('Failed to update finding:', err);
+      this.showToast(`Error updating finding: ${err.message}`);
+    } finally {
+      this.dom.saveEditFindingBtn.disabled = false;
+      this.dom.saveEditFindingBtn.innerHTML = `<svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Save Changes to Sheet</span>`;
+    }
+  }
+
+  async handleDeleteFinding(obs) {
+    if (!this.currentUser || this.currentUser.role !== 'ADMIN') {
+      this.showToast('Permission denied: Only ADMIN can delete findings.');
+      return;
+    }
+
+    const desc = obs.findings || obs.finding || `Finding #${obs.serial}`;
+    const confirmed = window.confirm(`Are you sure you want to delete finding #${obs.serial}: "${desc}"?\n\nThis will remove the row from the ${this.activePlant} spreadsheet (${this.activeReportDate}).`);
+    if (!confirmed) return;
+
+    try {
+      this.showToast(`Deleting finding #${obs.serial}...`);
+      const rowNumber = obs.rowNumber || (parseInt(obs.serial, 10) + 3);
+      await apiServiceInstance.deleteFinding(this.activePlant, this.activeReportDate, rowNumber);
+
+      // Also clean up local photos if any
+      const allPhotos = await dbInstance.getAllPhotos();
+      for (const p of allPhotos) {
+        if (p.plant === this.activePlant && p.reportDate === this.activeReportDate && formatSerial(p.serial) === obs.serial) {
+          await dbInstance.deletePhoto(p.id);
+        }
+      }
+
+      this.showToast(`Finding #${obs.serial} deleted successfully.`);
+      await this.loadSheetReport(this.activePlant, this.activeReportDate);
+    } catch (err) {
+      console.error('Failed to delete finding:', err);
+      this.showToast(`Error deleting finding: ${err.message}`);
+    }
+  }
+
+  async handleDeleteReport() {
+    if (!this.currentUser || this.currentUser.role !== 'ADMIN') {
+      this.showToast('Permission denied: Only ADMIN can delete entire reports.');
+      return;
+    }
+
+    const confirmed = window.confirm(`WARNING: Are you sure you want to permanently delete the entire report for ${this.activePlant} on date ${this.activeReportDate}?\n\nThis will remove the date tab from the Google Sheet.`);
+    if (!confirmed) return;
+
+    try {
+      this.showToast(`Deleting report tab ${this.activeReportDate} from ${this.activePlant}...`);
+      await apiServiceInstance.deletePlantReport(this.activePlant, this.activeReportDate);
+      this.showToast(`Report ${this.activeReportDate} deleted.`);
+
+      // Switch to Reports Hub and refresh
+      this.switchTab('reports');
+      await this.loadPlantReportsHub();
+    } catch (err) {
+      console.error('Failed to delete report:', err);
+      this.showToast(`Error deleting report: ${err.message}`);
+    }
+  }
+
+  /* ==========================================================================
      6. CAPTURE NEW FINDING (Column G Pictorial Evidence)
      ========================================================================== */
 
@@ -1108,33 +1278,40 @@ class EpicCAPApp {
     this.currentRawSource = snapCanvas;
     this.dom.activePhotoPreviewImg.src = snapCanvas.toDataURL('image/jpeg', 0.95);
     this.dom.activePhotoPreviewImg.classList.remove('hidden');
+    if (this.dom.capturePromptBox) this.dom.capturePromptBox.classList.add('hidden');
+    if (this.dom.capturePreviewContainer) this.dom.capturePreviewContainer.classList.remove('hidden');
+    if (this.dom.cameraViewport) this.dom.cameraViewport.classList.add('hidden');
+    if (this.dom.webcamControlsBar) this.dom.webcamControlsBar.classList.add('hidden');
     this.showToast('Photo captured.');
   }
 
-  handleFileInput(file, label = 'Mobile Photo') {
+  handleFileInput(file, label = 'Photo') {
     if (!file) return;
     const img = new Image();
     img.onload = () => {
       this.currentRawSource = img;
       this.dom.activePhotoPreviewImg.src = img.src;
       this.dom.activePhotoPreviewImg.classList.remove('hidden');
-      this.showToast(`${label} loaded.`);
+      if (this.dom.capturePromptBox) this.dom.capturePromptBox.classList.add('hidden');
+      if (this.dom.capturePreviewContainer) this.dom.capturePreviewContainer.classList.remove('hidden');
+      if (this.dom.cameraViewport) this.dom.cameraViewport.classList.add('hidden');
+      if (this.dom.webcamControlsBar) this.dom.webcamControlsBar.classList.add('hidden');
+      this.showToast(`${label} ready.`);
     };
     img.src = URL.createObjectURL(file);
   }
 
   clearRawSourcePreview() {
     this.currentRawSource = null;
-    this.dom.activePhotoPreviewImg.classList.add('hidden');
-    this.dom.activePhotoPreviewImg.src = '';
+    if (this.dom.activePhotoPreviewImg) {
+      this.dom.activePhotoPreviewImg.classList.add('hidden');
+      this.dom.activePhotoPreviewImg.src = '';
+    }
+    if (this.dom.capturePromptBox) this.dom.capturePromptBox.classList.remove('hidden');
+    if (this.dom.capturePreviewContainer) this.dom.capturePreviewContainer.classList.add('hidden');
   }
 
   async handleNewObservationSubmit() {
-    if (this.currentUser && this.currentUser.role !== 'ADMIN') {
-      this.showToast('Permission denied: Only ADMIN can create new findings.');
-      return;
-    }
-
     const findings = (this.dom.findingInput.value || '').trim();
     const location = (this.dom.locationInput.value || '').trim();
     const recommendation = (this.dom.recommendationInput.value || 'Immediate rectification required as per electrical safety standard').trim();
@@ -1257,20 +1434,10 @@ class EpicCAPApp {
      ========================================================================== */
 
   switchTab(tabKey) {
-    if (tabKey === 'capture' && this.currentUser && this.currentUser.role !== 'ADMIN') {
-      this.showToast('Only ADMIN can create new findings.');
-      return;
-    }
-
     this.dom.tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabKey));
     this.dom.tabPanes.forEach(p => p.classList.toggle('active', p.id === `${tabKey}Tab`));
 
-    if (tabKey === 'capture') {
-      const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
-      if (!isMobile) {
-        this.startCamera();
-      }
-    } else {
+    if (tabKey !== 'capture') {
       this.stopCaptureCamera();
     }
 
@@ -1701,12 +1868,12 @@ class EpicCAPApp {
 
     // Sheet View Actions
     this.dom.addNewObsFromSheetBtn.addEventListener('click', () => {
-      if (this.currentUser && this.currentUser.role !== 'ADMIN') {
-        this.showToast('Only ADMIN can add findings.');
-        return;
-      }
       this.switchTab('capture');
     });
+
+    if (this.dom.deleteReportBtn) {
+      this.dom.deleteReportBtn.addEventListener('click', () => this.handleDeleteReport());
+    }
 
     // Gallery Filters
     this.dom.galleryFilters.forEach(btn => {
@@ -1808,32 +1975,94 @@ class EpicCAPApp {
 
     this.dom.submitRectificationBtn.addEventListener('click', () => this.submitRectification());
 
-    // Capture New Finding Actions
-    this.dom.takeLivePhotoBtn.addEventListener('click', () => this.takeLivePhoto());
-    this.dom.phoneCameraInput.addEventListener('change', (e) => {
-      this.handleFileInput(e.target.files[0], 'Phone Camera');
-      e.target.value = '';
-    });
-    this.dom.photoGalleryInput.addEventListener('change', (e) => {
-      this.handleFileInput(e.target.files[0], 'Mobile Photo');
-      e.target.value = '';
-    });
-    this.dom.switchCameraBtn.addEventListener('click', () => {
-      this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
-      this.startCamera();
-    });
-    if (this.dom.startCameraBtn) {
-      this.dom.startCameraBtn.addEventListener('click', () => this.startCamera());
+    // Capture New Finding Actions (Minimal Hardware Cam & Local Files)
+    if (this.dom.phoneCameraInput) {
+      this.dom.phoneCameraInput.addEventListener('change', (e) => {
+        this.handleFileInput(e.target.files[0], 'Phone Camera');
+        e.target.value = '';
+      });
+    }
+    if (this.dom.photoGalleryInput) {
+      this.dom.photoGalleryInput.addEventListener('change', (e) => {
+        this.handleFileInput(e.target.files[0], 'Device File');
+        e.target.value = '';
+      });
+    }
+    if (this.dom.phoneCameraRetakeInput) {
+      this.dom.phoneCameraRetakeInput.addEventListener('change', (e) => {
+        this.handleFileInput(e.target.files[0], 'Phone Camera');
+        e.target.value = '';
+      });
+    }
+    if (this.dom.photoGalleryRetakeInput) {
+      this.dom.photoGalleryRetakeInput.addEventListener('change', (e) => {
+        this.handleFileInput(e.target.files[0], 'Device File');
+        e.target.value = '';
+      });
+    }
+    if (this.dom.clearCapturePhotoBtn) {
+      this.dom.clearCapturePhotoBtn.addEventListener('click', () => {
+        this.clearRawSourcePreview();
+      });
+    }
+    if (this.dom.toggleWebcamBtn) {
+      this.dom.toggleWebcamBtn.addEventListener('click', () => {
+        if (this.dom.cameraViewport) this.dom.cameraViewport.classList.remove('hidden');
+        if (this.dom.webcamControlsBar) this.dom.webcamControlsBar.classList.remove('hidden');
+        if (this.dom.capturePromptBox) this.dom.capturePromptBox.classList.add('hidden');
+        this.startCamera();
+      });
+    }
+    if (this.dom.closeWebcamBtn) {
+      this.dom.closeWebcamBtn.addEventListener('click', () => {
+        if (this.mediaStream) {
+          this.mediaStream.getTracks().forEach(t => t.stop());
+          this.mediaStream = null;
+        }
+        if (this.dom.cameraViewport) this.dom.cameraViewport.classList.add('hidden');
+        if (this.dom.webcamControlsBar) this.dom.webcamControlsBar.classList.add('hidden');
+        if (this.dom.capturePromptBox) this.dom.capturePromptBox.classList.remove('hidden');
+      });
+    }
+    if (this.dom.takeLivePhotoBtn) {
+      this.dom.takeLivePhotoBtn.addEventListener('click', () => {
+        this.takeLivePhoto();
+        if (this.mediaStream) {
+          this.mediaStream.getTracks().forEach(t => t.stop());
+          this.mediaStream = null;
+        }
+        if (this.dom.cameraViewport) this.dom.cameraViewport.classList.add('hidden');
+        if (this.dom.webcamControlsBar) this.dom.webcamControlsBar.classList.add('hidden');
+      });
+    }
+    if (this.dom.switchCameraBtn) {
+      this.dom.switchCameraBtn.addEventListener('click', () => {
+        this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
+        this.startCamera();
+      });
     }
 
-    this.dom.findingInput.addEventListener('input', () => this.updateDesktopPreview());
-    this.dom.locationInput.addEventListener('input', () => this.updateDesktopPreview());
-    this.dom.submitEvidenceBtn.addEventListener('click', () => this.handleNewObservationSubmit());
+    if (this.dom.findingInput) this.dom.findingInput.addEventListener('input', () => this.updateDesktopPreview());
+    if (this.dom.locationInput) this.dom.locationInput.addEventListener('input', () => this.updateDesktopPreview());
+    if (this.dom.submitEvidenceBtn) this.dom.submitEvidenceBtn.addEventListener('click', () => this.handleNewObservationSubmit());
 
-    // Settings Modal
+    // Edit Finding Modal Listeners
+    if (this.dom.closeEditFindingModalBtn) {
+      this.dom.closeEditFindingModalBtn.addEventListener('click', () => this.closeEditFindingModal());
+    }
+    if (this.dom.cancelEditFindingBtn) {
+      this.dom.cancelEditFindingBtn.addEventListener('click', () => this.closeEditFindingModal());
+    }
+    if (this.dom.saveEditFindingBtn) {
+      this.dom.saveEditFindingBtn.addEventListener('click', () => this.handleSaveEditFinding());
+    }
+
+    // Google Cloud Direct API Settings Modal
     const openSettings = () => {
-      this.dom.gasUrlInput.value = apiServiceInstance.getApiUrl();
-      this.dom.connectionStatusText.textContent = apiServiceInstance.isConfigured() ? 'Configured' : 'Not configured';
+      this.dom.connectionStatusText.textContent = 'Direct Google Cloud API Ready';
+      if (this.dom.connectionDetailText) {
+        this.dom.connectionDetailText.textContent = 'REST endpoints: sheets.googleapis.com & googleapis.com/upload/drive/v3';
+      }
       this.dom.settingsModal.classList.remove('hidden');
     };
 
@@ -1842,38 +2071,30 @@ class EpicCAPApp {
     this.dom.closeSettingsBtn.addEventListener('click', () => this.dom.settingsModal.classList.add('hidden'));
 
     this.dom.saveSettingsBtn.addEventListener('click', () => {
-      const url = this.dom.gasUrlInput.value.trim();
-      apiServiceInstance.setApiUrl(url);
       this.dom.settingsModal.classList.add('hidden');
-      this.showToast('Backend settings saved.');
-      if (url) syncEngineInstance.processQueue();
+      this.showToast('Google Cloud settings saved.');
+      syncEngineInstance.processQueue();
     });
 
     this.dom.testConnectionBtn.addEventListener('click', async () => {
-      const url = this.dom.gasUrlInput.value.trim();
-      if (!url) {
-        this.dom.connectionStatusText.textContent = 'Please enter a URL first.';
-        return;
-      }
-      this.dom.connectionStatusText.textContent = 'Testing connection...';
+      this.dom.connectionStatusText.textContent = 'Pinging Google Sheets & Drive APIs...';
+      if (this.dom.connectionLatencyBadge) this.dom.connectionLatencyBadge.textContent = '';
+      if (this.dom.connectionDetailText) this.dom.connectionDetailText.textContent = '';
+      
       try {
-        await apiServiceInstance.testConnection(url);
-        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: var(--ms-success);">${ICONS.check} <span>Connection Successful!</span></span>`;
-        this.dom.connectionStatusText.style.color = 'var(--ms-success)';
+        const res = await apiServiceInstance.testConnection();
+        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: var(--ms-success);">${ICONS.check} <span>Connected & Operational</span></span>`;
+        if (this.dom.connectionLatencyBadge) {
+          this.dom.connectionLatencyBadge.textContent = `Total: ${res.totalLatencyMs}ms`;
+        }
+        if (this.dom.connectionDetailText) {
+          this.dom.connectionDetailText.innerHTML = `<strong>Sheets API:</strong> ${res.sheetsLatencyMs}ms | <strong>Drive API:</strong> ${res.driveLatencyMs}ms`;
+        }
       } catch (err) {
-        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: #a80000;">${ICONS.alert} <span>Connection failed: ${err.message}</span></span>`;
-        this.dom.connectionStatusText.style.color = '#a80000';
-      }
-    });
-
-    this.dom.initSheetsBtn.addEventListener('click', async () => {
-      this.dom.connectionStatusText.textContent = 'Initializing master sheets...';
-      try {
-        await apiServiceInstance.initMasterSheets();
-        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: var(--ms-success);">${ICONS.check} <span>Master Sheets Initialized.</span></span>`;
-        this.dom.connectionStatusText.style.color = 'var(--ms-success)';
-      } catch (err) {
-        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: #a80000;">${ICONS.alert} <span>Failed: ${err.message}</span></span>`;
+        this.dom.connectionStatusText.innerHTML = `<span class="icon-label" style="color: #a80000;">${ICONS.alert} <span>Attention Needed</span></span>`;
+        if (this.dom.connectionDetailText) {
+          this.dom.connectionDetailText.textContent = err.message;
+        }
       }
     });
 
