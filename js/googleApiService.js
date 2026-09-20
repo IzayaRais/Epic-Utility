@@ -68,6 +68,73 @@ const RISK_DEADLINE_MAP = {
   "Priority 3": "3 Days"
 };
 
+/**
+ * Universal date parser for Google Sheet tab titles.
+ * Supports ISO (YYYY-MM-DD), DD Mon YYYY ("08 Sep 2026- PGCL", "8-Sep-2026"), Mon DD YYYY ("Sep 08, 2026").
+ * Ignores Summary overview tabs.
+ */
+export function parseTabDate(title) {
+  if (!title || typeof title !== 'string') return null;
+  const trimmed = title.trim();
+  if (trimmed.toLowerCase() === 'summary') return null;
+
+  // 1. Try YYYY-MM-DD or YYYY/MM/DD
+  const isoMatch = trimmed.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+  if (isoMatch) {
+    return `${isoMatch[1]}-${isoMatch[2].padStart(2, '0')}-${isoMatch[3].padStart(2, '0')}`;
+  }
+
+  // 2. Try DD Mon YYYY (e.g. "08 Sep 2026- PGCL", "8 September 2026", "08-Sep-2026")
+  const dmyMatch = trimmed.match(/(\d{1,2})[\s\-_,]+([A-Za-z]{3,9})[\s\-_,]+(\d{4})/);
+  if (dmyMatch) {
+    const day = dmyMatch[1].padStart(2, '0');
+    const monStr = dmyMatch[2].toLowerCase().substring(0, 3);
+    const months = { jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06', jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12' };
+    const month = months[monStr] || '01';
+    const year = dmyMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  // 3. Try Mon DD YYYY (e.g. "Sep 08, 2026")
+  const mdyMatch = trimmed.match(/([A-Za-z]{3,9})[\s\-_,]+(\d{1,2})[\s\-_,]+(\d{4})/);
+  if (mdyMatch) {
+    const monStr = mdyMatch[1].toLowerCase().substring(0, 3);
+    const months = { jan:'01', feb:'02', mar:'03', apr:'04', may:'05', jun:'06', jul:'07', aug:'08', sep:'09', oct:'10', nov:'11', dec:'12' };
+    const month = months[monStr] || '01';
+    const day = mdyMatch[2].padStart(2, '0');
+    const year = mdyMatch[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  return trimmed;
+}
+
+/**
+ * Resolve sheet tab from spreadsheet metadata matching exact title, parsed date, or substring.
+ */
+export function resolveSheetTab(sheets, identifier) {
+  if (!sheets || !sheets.length || !identifier) return null;
+  const target = String(identifier).trim().toLowerCase();
+
+  // 1. Exact match on title
+  let found = sheets.find(s => (s.properties?.title || '').trim().toLowerCase() === target);
+  if (found) return found;
+
+  // 2. Match on parsed date
+  found = sheets.find(s => {
+    const parsed = parseTabDate(s.properties?.title);
+    return parsed && parsed.toLowerCase() === target;
+  });
+  if (found) return found;
+
+  // 3. Substring match (excluding summary)
+  found = sheets.find(s => {
+    const title = (s.properties?.title || '').toLowerCase();
+    return title.includes(target) && title !== 'summary';
+  });
+  return found || null;
+}
+
 const STORAGE_KEY_ACTIVE_PLANT = 'cap_active_plant';
 const STORAGE_KEY_CURRENT_USER = 'cap_current_user';
 const STORAGE_KEY_SESSION_TOKEN = 'cap_session_token';
@@ -353,7 +420,8 @@ export class GoogleApiService {
   }
 
   /**
-   * List all date-wise CAP reports available for a plant (tabs matching YYYY-MM-DD)
+   * List all date-wise CAP reports available for a plant directly from Google Sheets.
+   * Discovers all report date tabs (excluding Summary) and fetches live statistics in a single batch.
    */
   async listPlantReports(plant = null) {
     const targetPlant = plant || this.activePlant || 'CIPL';
@@ -367,32 +435,94 @@ export class GoogleApiService {
           throw new Error(`No workbook configured for plant: ${targetPlant}`);
         }
 
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${plantConfig.spreadsheetId}?fields=sheets.properties.title`;
-        const res = await fetch(url, {
+        const spreadsheetId = plantConfig.spreadsheetId;
+        const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`;
+        const metaRes = await fetch(metaUrl, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (!res.ok) {
-          throw new Error(`Sheets API HTTP ${res.status}`);
+        if (!metaRes.ok) {
+          throw new Error(`Sheets API HTTP ${metaRes.status}`);
         }
 
-        const data = await res.json();
-        const sheets = data.sheets || [];
-        const reports = [];
+        const metaData = await metaRes.json();
+        const sheets = metaData.sheets || [];
+        const reportTabs = [];
 
         for (const s of sheets) {
           const title = s.properties?.title || '';
-          if (/^\d{4}-\d{2}-\d{2}$/.test(title)) {
-            reports.push({
-              id: title,
-              reportDate: title,
-              name: `${targetPlant}- Electrical Internal CAP Report - ${title}`,
-              tabName: title
-            });
-          }
+          if (!title || title.trim().toLowerCase() === 'summary') continue;
+          
+          const parsedDate = parseTabDate(title) || title;
+          reportTabs.push({
+            sheetId: s.properties?.sheetId,
+            title,
+            reportDate: parsedDate
+          });
         }
 
-        // Sort descending by date
+        if (reportTabs.length === 0) {
+          return { success: true, plant: targetPlant, reports: [] };
+        }
+
+        // Single HTTP batch request to fetch rows A4:K for all tabs directly from Sheet
+        const rangeParams = reportTabs.map(t => `ranges=${encodeURIComponent("'" + t.title + "'!A4:K")}`).join('&');
+        const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${rangeParams}&valueRenderOption=FORMATTED_VALUE`;
+        
+        let valueRanges = [];
+        try {
+          const batchRes = await fetch(batchUrl, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (batchRes.ok) {
+            const batchData = await batchRes.json();
+            valueRanges = batchData.valueRanges || [];
+          }
+        } catch (bErr) {
+          console.warn('[GoogleApiService] batchGet error:', bErr);
+        }
+
+        const reports = [];
+
+        for (let idx = 0; idx < reportTabs.length; idx++) {
+          const tab = reportTabs[idx];
+          const vr = valueRanges[idx] || {};
+          const rows = (vr.values || []).filter(r => r && r.length > 0 && r.some(cell => cell && String(cell).trim()));
+
+          let p1 = 0, p2 = 0, p3 = 0, rectified = 0, pending = 0;
+          for (const r of rows) {
+            const risk = String(r[4] || '').trim();
+            const remarks = String(r[10] || '').trim().toLowerCase();
+
+            if (risk.includes('1')) p1++;
+            else if (risk.includes('3')) p3++;
+            else p2++;
+
+            if (remarks.includes('rectified') && !remarks.includes('not')) {
+              rectified++;
+            } else {
+              pending++;
+            }
+          }
+
+          reports.push({
+            id: tab.title,
+            tabName: tab.title,
+            sheetId: tab.sheetId,
+            reportDate: tab.reportDate,
+            name: `${targetPlant}- Electrical Internal CAP Report - ${tab.reportDate}`,
+            url: `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${tab.sheetId}`,
+            totalObservations: rows.length,
+            p1Count: p1,
+            p2Count: p2,
+            p3Count: p3,
+            rectifiedCount: rectified,
+            pendingCount: pending,
+            source: 'GOOGLE_SHEET'
+          });
+        }
+
+        // Sort descending by reportDate
         reports.sort((a, b) => b.reportDate.localeCompare(a.reportDate));
 
         return { success: true, plant: targetPlant, reports };
@@ -425,15 +555,18 @@ export class GoogleApiService {
       throw new Error(`Failed to read plant workbook: HTTP ${metaRes.status}`);
     }
     const meta = await metaRes.json();
-    const existing = (meta.sheets || []).find(s => s.properties?.title === targetDate);
+    const existing = resolveSheetTab(meta.sheets, targetDate);
 
     if (existing) {
+      const actualTitle = existing.properties.title;
+      const parsedDate = parseTabDate(actualTitle) || targetDate;
       return {
         success: true,
         created: false,
         plant: targetPlant,
-        reportDate: targetDate,
-        name: `${targetPlant}- Electrical Internal CAP Report - ${targetDate}`,
+        reportDate: parsedDate,
+        tabName: actualTitle,
+        name: `${targetPlant}- Electrical Internal CAP Report - ${parsedDate}`,
         url: `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${existing.properties.sheetId}`
       };
     }
@@ -575,19 +708,37 @@ export class GoogleApiService {
     return redisCache.getOrFetch(cacheKey, async () => {
       try {
         const token = await this.getAccessToken();
-        
+
+        // 1. Fetch metadata to resolve the exact sheet tab name and sheetId
+        const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!metaRes.ok) {
+          return { found: false, plant: targetPlant, reportDate: targetDate, observations: [] };
+        }
+        const meta = await metaRes.json();
+        const sheet = resolveSheetTab(meta.sheets, targetDate);
+        if (!sheet) {
+          return { found: false, plant: targetPlant, reportDate: targetDate, observations: [] };
+        }
+
+        const sheetTitle = sheet.properties.title;
+        const sheetId = sheet.properties.sheetId;
+        const parsedDate = parseTabDate(sheetTitle) || targetDate;
+        const encodedRange = encodeURIComponent(`'${sheetTitle}'!A4:K`);
+
         // Fetch values and formulas in parallel
         const [valsRes, formRes] = await Promise.all([
-          fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${targetDate}!A4:K?valueRenderOption=FORMATTED_VALUE`, {
+          fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedRange}?valueRenderOption=FORMATTED_VALUE`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${targetDate}!A4:K?valueRenderOption=FORMULA`, {
+          fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodedRange}?valueRenderOption=FORMULA`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
 
         if (!valsRes.ok) {
-          return { found: false, plant: targetPlant, reportDate: targetDate, observations: [] };
+          return { found: false, plant: targetPlant, reportDate: parsedDate, observations: [] };
         }
 
         const valsData = await valsRes.json();
@@ -600,44 +751,60 @@ export class GoogleApiService {
         for (let i = 0; i < rows.length; i++) {
           const rowVal = rows[i] || [];
           const rowForm = formulaRows[i] || [];
-          if (!rowVal[0] && !rowVal[1]) continue;
+          if (!rowVal.some(c => c && String(c).trim())) continue;
 
-          const serialNum = String(i + 1).padStart(3, '0');
+          const rawSl = String(rowVal[0] || (i + 1)).trim();
+          const serialNum = rawSl.replace(/^0+/, '').padStart(3, '0') || String(i + 1).padStart(3, '0');
 
-          // Extract pictorialEvidenceUrl from formula
+          // Extract pictorialEvidenceUrl from formula or direct link
           let pictorialEvidenceUrl = "";
           const formulaG = String(rowForm[6] || "");
           const matchG = formulaG.match(/HYPERLINK\("([^"]+)"/i);
-          if (matchG) pictorialEvidenceUrl = matchG[1];
+          if (matchG) {
+            pictorialEvidenceUrl = matchG[1];
+          } else if (String(rowVal[6] || "").startsWith('http')) {
+            pictorialEvidenceUrl = String(rowVal[6]).trim();
+          }
 
-          // Extract correctedPictureUrl from formula
+          // Extract correctedPictureUrl from formula or direct link
           let correctedPictureUrl = "";
           const formulaJ = String(rowForm[9] || "");
           const matchJ = formulaJ.match(/HYPERLINK\("([^"]+)"/i);
-          if (matchJ) correctedPictureUrl = matchJ[1];
+          if (matchJ) {
+            correctedPictureUrl = matchJ[1];
+          } else if (String(rowVal[9] || "").startsWith('http')) {
+            correctedPictureUrl = String(rowVal[9]).trim();
+          }
+
+          const remarks = rowVal[10] || "Not Rectified";
+          const isRectified = remarks.toLowerCase().includes('rectified') && !remarks.toLowerCase().includes('not');
+          const riskLevel = rowVal[4] || "Priority 2";
 
           observations.push({
             serial: serialNum,
             rowNumber: i + 4,
-            finding: rowVal[1] || "",
-            recommendation: rowVal[2] || "",
-            location: rowVal[3] || "",
-            riskLevel: rowVal[4] || "",
+            findings: rowVal[1] || `Finding #${serialNum}`,
+            recommendation: rowVal[2] || "Immediate rectification required as per electrical safety standard",
+            location: rowVal[3] || "Site",
+            riskLevel,
             generalLocation: rowVal[5] || targetPlant,
             pictorialEvidenceUrl,
-            responsible: rowVal[7] || "",
-            deadline: rowVal[8] || "",
+            responsible: rowVal[7] || "Utility In-Charge",
+            deadline: rowVal[8] || (riskLevel === 'Priority 1' ? '7 Days' : riskLevel === 'Priority 3' ? '3 Days' : '4 Days'),
             correctedPictureUrl,
-            remarks: rowVal[10] || "Not Rectified"
+            remarks,
+            isRectified,
+            source: 'GOOGLE_SHEET'
           });
         }
 
         return {
           found: true,
           plant: targetPlant,
-          reportDate: targetDate,
-          sheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`,
-          sheetName: targetDate,
+          reportDate: parsedDate,
+          tabName: sheetTitle,
+          sheetUrl: `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=${sheetId}`,
+          sheetName: sheetTitle,
           observations
         };
       } catch (err) {
@@ -856,7 +1023,14 @@ export class GoogleApiService {
     const formula = `=HYPERLINK("${driveFileUrl}", IMAGE("${directThumbnailUrl}", 1))`;
 
     const spreadsheetId = plantConfig.spreadsheetId;
-    const cellRange = `${targetDate}!${targetCol}${targetRow}`;
+    const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const meta = metaRes.ok ? await metaRes.json() : { sheets: [] };
+    const sheet = resolveSheetTab(meta.sheets, targetDate);
+    const sheetTitle = sheet ? sheet.properties.title : targetDate;
+
+    const cellRange = encodeURIComponent(`'${sheetTitle}'!${targetCol}${targetRow}`);
     const cellUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${cellRange}?valueInputOption=USER_ENTERED`;
 
     await fetch(cellUrl, {
@@ -870,7 +1044,7 @@ export class GoogleApiService {
 
     // If corrected photo, also mark Column K = Rectified
     if (isCorrected) {
-      const remarksRange = `${targetDate}!K${targetRow}`;
+      const remarksRange = encodeURIComponent(`'${sheetTitle}'!K${targetRow}`);
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${remarksRange}?valueInputOption=USER_ENTERED`, {
         method: 'PUT',
         headers: {
@@ -882,7 +1056,7 @@ export class GoogleApiService {
     }
 
     // Set row height to 115px for visible in-cell preview
-    this.setRowHeight(spreadsheetId, targetDate, targetRow - 1, 115, token).catch(() => {});
+    this.setRowHeight(spreadsheetId, sheetTitle, targetRow - 1, 115, token).catch(() => {});
 
     // Invalidate caches
     redisCache.invalidatePattern(`report_info:${targetPlant}`);
@@ -904,7 +1078,7 @@ export class GoogleApiService {
         headers: { Authorization: `Bearer ${token}` }
       });
       const meta = await metaRes.json();
-      const sheet = (meta.sheets || []).find(s => s.properties?.title === sheetTitle);
+      const sheet = resolveSheetTab(meta.sheets, sheetTitle);
       if (!sheet) return;
 
       await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`, {
@@ -928,7 +1102,7 @@ export class GoogleApiService {
         })
       });
     } catch (e) {
-      // Row height is cosmetic, don't fail operation
+      console.warn('Set row height note:', e);
     }
   }
 
@@ -1146,12 +1320,13 @@ export class GoogleApiService {
       headers: { Authorization: `Bearer ${token}` }
     });
     const meta = await metaRes.json();
-    const sheet = (meta.sheets || []).find(s => s.properties?.title === reportDate);
+    const sheet = resolveSheetTab(meta.sheets, reportDate);
     if (!sheet) {
       throw new Error(`Report tab ${reportDate} not found.`);
     }
 
     const sheetId = sheet.properties.sheetId;
+    const sheetTitle = sheet.properties.title;
     const rowIndex = parseInt(rowNumber, 10) - 1; // 0-indexed
 
     // 2. Delete row dimension
@@ -1190,7 +1365,7 @@ export class GoogleApiService {
     this.writeLog({
       action: 'FINDING_DELETED',
       status: 'SUCCESS',
-      message: `Admin deleted row ${rowNumber} from ${targetPlant} - ${reportDate}`
+      message: `Admin deleted row ${rowNumber} from ${targetPlant} - ${sheetTitle}`
     }).catch(() => {});
 
     return { success: true, plant: targetPlant, reportDate, rowNumber };
@@ -1214,8 +1389,15 @@ export class GoogleApiService {
     const token = await this.getAccessToken();
     const deadline = RISK_DEADLINE_MAP[riskLevel] || "4 Days";
 
+    const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const meta = metaRes.ok ? await metaRes.json() : { sheets: [] };
+    const sheet = resolveSheetTab(meta.sheets, reportDate);
+    const sheetTitle = sheet ? sheet.properties.title : reportDate;
+
     // Update Columns B to E
-    const urlBtoE = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${reportDate}!B${rowNumber}:E${rowNumber}?valueInputOption=USER_ENTERED`;
+    const urlBtoE = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent("'" + sheetTitle + "'!B" + rowNumber + ":E" + rowNumber)}?valueInputOption=USER_ENTERED`;
     await fetch(urlBtoE, {
       method: 'PUT',
       headers: {
@@ -1228,7 +1410,7 @@ export class GoogleApiService {
     });
 
     // Update Deadline in Column I
-    const urlI = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${reportDate}!I${rowNumber}?valueInputOption=USER_ENTERED`;
+    const urlI = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent("'" + sheetTitle + "'!I" + rowNumber)}?valueInputOption=USER_ENTERED`;
     await fetch(urlI, {
       method: 'PUT',
       headers: {
@@ -1269,7 +1451,7 @@ export class GoogleApiService {
       headers: { Authorization: `Bearer ${token}` }
     });
     const meta = await metaRes.json();
-    const sheet = (meta.sheets || []).find(s => s.properties?.title === reportDate);
+    const sheet = resolveSheetTab(meta.sheets, reportDate);
     if (!sheet) {
       throw new Error(`Report tab ${reportDate} not found.`);
     }

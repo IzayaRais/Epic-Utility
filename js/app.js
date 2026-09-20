@@ -224,6 +224,7 @@ class EpicCAPApp {
 
   async init() {
     await dbInstance.init();
+    await dbInstance.cleanupOrphanPhotos();
     this.dom.reportDatePicker.value = this.activeReportDate;
 
     this.setupEventListeners();
@@ -330,12 +331,12 @@ class EpicCAPApp {
     this.dom.reportsGrid.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--ms-text-secondary);" class="icon-label">
         ${ICONS.refresh}
-        <span>Loading date-wise CAP reports from Google Drive & Sheets...</span>
+        <span>Loading date-wise CAP reports directly from Google Sheets...</span>
       </div>
     `;
 
     try {
-      // 1. Fetch remote reports from Google Drive plant folder
+      // 1. Fetch remote reports directly from Google Sheets for this plant
       let remoteReports = [];
       try {
         const res = await apiServiceInstance.listPlantReports(this.activePlant);
@@ -346,76 +347,45 @@ class EpicCAPApp {
         console.warn('Could not fetch remote plant reports list:', e);
       }
 
-      // 2. Fetch local IndexedDB photos to aggregate local reports
-      const localPhotos = await dbInstance.getAllPhotos();
-      const plantPhotos = localPhotos.filter(p => !p.plant || p.plant === this.activePlant);
+      this.reportsList = remoteReports;
 
-      // Group local photos by reportDate
-      const dateMap = new Map();
-      for (const p of plantPhotos) {
-        const d = p.reportDate || this.activeReportDate;
-        if (!dateMap.has(d)) dateMap.set(d, []);
-        dateMap.get(d).push(p);
+      // 2. If no reports found on Google Sheets, check for plant-isolated local pending items
+      if (this.reportsList.length === 0) {
+        const localPlantPhotos = await dbInstance.getPhotosByPlant(this.activePlant);
+        const dateMap = new Map();
+        for (const p of localPlantPhotos) {
+          const d = p.reportDate || this.activeReportDate;
+          if (d) {
+            if (!dateMap.has(d)) dateMap.set(d, []);
+            dateMap.get(d).push(p);
+          }
+        }
+
+        for (const [d, photos] of dateMap.entries()) {
+          const origPhotos = photos.filter(p => p.photoType === 'ORIGINAL');
+          const corrCount = photos.filter(p => p.photoType === 'CORRECTED').length;
+          const p1Local = origPhotos.filter(p => p.riskLevel === 'Priority 1').length;
+          const p2Local = origPhotos.filter(p => p.riskLevel === 'Priority 2' || !p.riskLevel).length;
+          const p3Local = origPhotos.filter(p => p.riskLevel === 'Priority 3').length;
+
+          this.reportsList.push({
+            id: `local-${d}`,
+            tabName: d,
+            reportDate: d,
+            name: `${this.activePlant}- Electrical Internal CAP Report - ${d}`,
+            url: null,
+            totalObservations: origPhotos.length,
+            p1Count: p1Local,
+            p2Count: p2Local,
+            p3Count: p3Local,
+            rectifiedCount: corrCount,
+            pendingCount: Math.max(0, origPhotos.length - corrCount),
+            source: 'LOCAL'
+          });
+        }
       }
 
-      // Always include today's report
-      const today = new Date().toISOString().substring(0, 10);
-      if (!dateMap.has(today)) {
-        dateMap.set(today, []);
-      }
-
-      // Merge remote and local reports
-      const mergedMap = new Map();
-
-      for (const r of remoteReports) {
-        const d = r.reportDate || today;
-        mergedMap.set(d, {
-          id: r.id,
-          reportDate: d,
-          name: r.name || `${this.activePlant}- Electrical Internal CAP Report - ${d}`,
-          url: r.url,
-          totalObservations: r.totalObservations || 0,
-          p1Count: r.p1Count || 0,
-          p2Count: r.p2Count || 0,
-          p3Count: r.p3Count || 0,
-          rectifiedCount: r.rectifiedCount || 0,
-          pendingCount: r.pendingCount || 0,
-          source: 'GOOGLE_DRIVE'
-        });
-      }
-
-      for (const [d, photos] of dateMap.entries()) {
-        const existing = mergedMap.get(d) || {
-          id: `local-${d}`,
-          reportDate: d,
-          name: `${this.activePlant}- Electrical Internal CAP Report - ${d}`,
-          url: null,
-          totalObservations: 0,
-          p1Count: 0,
-          p2Count: 0,
-          p3Count: 0,
-          rectifiedCount: 0,
-          pendingCount: 0,
-          source: 'LOCAL'
-        };
-
-        const origPhotos = photos.filter(p => p.photoType === 'ORIGINAL');
-        const corrCount = photos.filter(p => p.photoType === 'CORRECTED').length;
-        const p1Local = origPhotos.filter(p => p.riskLevel === 'Priority 1').length;
-        const p2Local = origPhotos.filter(p => p.riskLevel === 'Priority 2' || !p.riskLevel).length;
-        const p3Local = origPhotos.filter(p => p.riskLevel === 'Priority 3').length;
-
-        existing.totalObservations = Math.max(existing.totalObservations, origPhotos.length);
-        existing.p1Count = Math.max(existing.p1Count || 0, p1Local);
-        existing.p2Count = Math.max(existing.p2Count || 0, p2Local);
-        existing.p3Count = Math.max(existing.p3Count || 0, p3Local);
-        existing.rectifiedCount = Math.max(existing.rectifiedCount, corrCount);
-        existing.pendingCount = Math.max(0, existing.totalObservations - existing.rectifiedCount);
-
-        mergedMap.set(d, existing);
-      }
-
-      this.reportsList = Array.from(mergedMap.values()).sort((a, b) => b.reportDate.localeCompare(a.reportDate));
+      this.reportsList.sort((a, b) => b.reportDate.localeCompare(a.reportDate));
 
       if (this.dom.reportsCountBadge) {
         this.dom.reportsCountBadge.textContent = this.reportsList.length;
@@ -426,7 +396,9 @@ class EpicCAPApp {
       // Select latest report by default
       if (this.reportsList.length > 0) {
         const latest = this.reportsList[0];
-        this.setActiveReport(latest.reportDate, latest.name, latest.url);
+        this.setActiveReport(latest.reportDate, latest.name, latest.url, latest.tabName);
+      } else {
+        if (this.dom.reportsGridEmpty) this.dom.reportsGridEmpty.classList.remove('hidden');
       }
 
     } catch (err) {
@@ -496,18 +468,18 @@ class EpicCAPApp {
 
       card.querySelector('.open-sheet-btn').addEventListener('click', (e) => {
         e.stopPropagation();
-        this.setActiveReport(report.reportDate, report.name, report.url);
+        this.setActiveReport(report.reportDate, report.name, report.url, report.tabName);
         this.switchTab('sheet');
       });
 
       card.querySelector('.open-gallery-btn').addEventListener('click', (e) => {
         e.stopPropagation();
-        this.setActiveReport(report.reportDate, report.name, report.url);
+        this.setActiveReport(report.reportDate, report.name, report.url, report.tabName);
         this.switchTab('gallery');
       });
 
       card.addEventListener('click', () => {
-        this.setActiveReport(report.reportDate, report.name, report.url);
+        this.setActiveReport(report.reportDate, report.name, report.url, report.tabName);
         this.switchTab('sheet');
       });
 
@@ -515,8 +487,9 @@ class EpicCAPApp {
     }
   }
 
-  setActiveReport(reportDate, name = null, sheetUrl = null) {
+  setActiveReport(reportDate, name = null, sheetUrl = null, tabName = null) {
     this.activeReportDate = reportDate;
+    this.activeReportTabName = tabName || reportDate;
     this.activeSpreadsheetUrl = sheetUrl;
     this.dom.reportDatePicker.value = reportDate;
 
@@ -543,10 +516,10 @@ class EpicCAPApp {
 
   async loadActiveReportObservations() {
     try {
-      // 1. Try fetching remote observation records from the date sheet
+      // 1. Fetch remote observation records directly from the Google Sheet tab
       let remoteObs = [];
       try {
-        const res = await apiServiceInstance.getPlantReportInfo(this.activePlant, this.activeReportDate);
+        const res = await apiServiceInstance.getPlantReportInfo(this.activePlant, this.activeReportTabName || this.activeReportDate);
         if (res && res.found && res.observations) {
           remoteObs = res.observations;
           if (res.sheetUrl) {
@@ -559,25 +532,25 @@ class EpicCAPApp {
         console.warn('Could not fetch remote sheet observations:', e);
       }
 
-      // 2. Fetch local photos for this plant and date
-      const localPhotos = await dbInstance.getAllPhotos();
+      // 2. Fetch strictly plant-isolated pending local photos
+      const localPhotos = await dbInstance.getPhotosByPlant(this.activePlant);
       const dateLocalPhotos = localPhotos.filter(
-        p => (!p.plant || p.plant === this.activePlant) && (p.reportDate === this.activeReportDate)
+        p => (p.reportDate === this.activeReportDate || p.tabName === this.activeReportTabName) && p.syncStatus === 'PENDING'
       );
 
-      // Merge observations
+      // Merge observations directly from authoritative Google Sheet
       const obsMap = new Map();
 
-      // Seed with remote observations
+      // Seed with remote observations from Google Sheet
       for (const r of remoteObs) {
         const s = formatSerial(r.serial);
         const isRect = String(r.remarks).toLowerCase().indexOf('rectified') !== -1 && String(r.remarks).toLowerCase().indexOf('not') === -1;
         obsMap.set(s, {
           serial: s,
           rowNumber: r.rowNumber || (parseInt(s, 10) + 3),
-          findings: r.finding,
+          findings: r.findings || r.finding || `Finding #${s}`,
           recommendation: r.recommendation || 'Immediate rectification required as per electrical safety standard',
-          location: r.location,
+          location: r.location || 'Site',
           riskLevel: r.riskLevel || 'Priority 2',
           generalLocation: r.generalLocation || this.activePlant,
           pictorialEvidenceUrl: r.pictorialEvidenceUrl,
@@ -592,8 +565,7 @@ class EpicCAPApp {
         });
       }
 
-      // Two-pass merge for local photos to guarantee parent-child relationship
-      // Pass 1: Seed all ORIGINAL observations
+      // Pass 1: Seed any pending local ORIGINAL observations strictly for this plant
       for (const p of dateLocalPhotos) {
         if (p.photoType === 'ORIGINAL') {
           const s = formatSerial(p.serial);
@@ -998,7 +970,8 @@ class EpicCAPApp {
       if (this.rectifyStream && this.dom.rectifyCameraVideo.videoWidth) {
         sourceElement = this.dom.rectifyCameraVideo;
       } else {
-        sourceElement = this.generateSampleIndustrialScene(`RECTIFIED: ${obs.findings}`, obs.location);
+        this.showToast('Please snap a corrected photo or choose an image file first.');
+        return;
       }
     }
 
@@ -1010,6 +983,7 @@ class EpicCAPApp {
 
       // Create Canonical Corrected Record
       const record = createPhotoRecord({
+        plant: this.activePlant,
         serial: obs.serial,
         parentSerial: obs.serial,
         findings: obs.findings,
@@ -1020,7 +994,7 @@ class EpicCAPApp {
       });
 
       record.plant = this.activePlant;
-      record.reportDate = this.activeReportDate;
+      record.reportDate = this.activeReportTabName || this.activeReportDate;
       record.riskLevel = obs.riskLevel;
 
       // 1:1 Canvas center crop + bottom white strip with CORRECTED 01 tag
@@ -1142,7 +1116,7 @@ class EpicCAPApp {
       this.dom.saveEditFindingBtn.disabled = true;
       this.dom.saveEditFindingBtn.innerHTML = `<span class="icon-label">${ICONS.refresh} <span>Saving to Sheet...</span></span>`;
 
-      await apiServiceInstance.updateFinding(this.activePlant, this.activeReportDate, rowNumber, {
+      await apiServiceInstance.updateFinding(this.activePlant, this.activeReportTabName || this.activeReportDate, rowNumber, {
         finding,
         recommendation,
         location,
@@ -1151,7 +1125,7 @@ class EpicCAPApp {
 
       this.showToast(`Finding #${serial} updated in Google Sheet.`);
       this.closeEditFindingModal();
-      await this.loadSheetReport(this.activePlant, this.activeReportDate);
+      await this.loadActiveReportObservations();
     } catch (err) {
       console.error('Failed to update finding:', err);
       this.showToast(`Error updating finding: ${err.message}`);
@@ -1174,18 +1148,18 @@ class EpicCAPApp {
     try {
       this.showToast(`Deleting finding #${obs.serial}...`);
       const rowNumber = obs.rowNumber || (parseInt(obs.serial, 10) + 3);
-      await apiServiceInstance.deleteFinding(this.activePlant, this.activeReportDate, rowNumber);
+      await apiServiceInstance.deleteFinding(this.activePlant, this.activeReportTabName || this.activeReportDate, rowNumber);
 
       // Also clean up local photos if any
       const allPhotos = await dbInstance.getAllPhotos();
       for (const p of allPhotos) {
-        if (p.plant === this.activePlant && p.reportDate === this.activeReportDate && formatSerial(p.serial) === obs.serial) {
+        if (p.plant === this.activePlant && (p.reportDate === this.activeReportDate || p.tabName === this.activeReportTabName) && formatSerial(p.serial) === obs.serial) {
           await dbInstance.deletePhoto(p.id);
         }
       }
 
       this.showToast(`Finding #${obs.serial} deleted successfully.`);
-      await this.loadSheetReport(this.activePlant, this.activeReportDate);
+      await this.loadActiveReportObservations();
     } catch (err) {
       console.error('Failed to delete finding:', err);
       this.showToast(`Error deleting finding: ${err.message}`);
@@ -1203,7 +1177,7 @@ class EpicCAPApp {
 
     try {
       this.showToast(`Deleting report tab ${this.activeReportDate} from ${this.activePlant}...`);
-      await apiServiceInstance.deletePlantReport(this.activePlant, this.activeReportDate);
+      await apiServiceInstance.deletePlantReport(this.activePlant, this.activeReportTabName || this.activeReportDate);
       this.showToast(`Report ${this.activeReportDate} deleted.`);
 
       // Switch to Reports Hub and refresh
@@ -1314,8 +1288,8 @@ class EpicCAPApp {
   async handleNewObservationSubmit() {
     const findings = (this.dom.findingInput.value || '').trim();
     const location = (this.dom.locationInput.value || '').trim();
-    const recommendation = (this.dom.recommendationInput.value || 'Immediate rectification required as per electrical safety standard').trim();
-    const riskLevel = this.dom.riskLevelSelect.value || 'Priority 2';
+    const recommendation = 'Immediate rectification required as per electrical safety standard';
+    const riskLevel = 'Priority 2';
 
     if (!findings) {
       this.showToast('Please enter Finding / Observation.');
@@ -1333,7 +1307,8 @@ class EpicCAPApp {
       if (this.mediaStream && this.dom.cameraVideo.videoWidth) {
         sourceElement = this.dom.cameraVideo;
       } else {
-        sourceElement = this.generateSampleIndustrialScene(findings, location);
+        this.showToast('Please snap a photo or choose an image file first.');
+        return;
       }
     }
 
@@ -1345,6 +1320,7 @@ class EpicCAPApp {
       const captureTimestamp = new Date();
 
       const record = createPhotoRecord({
+        plant: this.activePlant,
         serial: allocatedSerial,
         findings,
         location,
@@ -1353,7 +1329,7 @@ class EpicCAPApp {
       });
 
       record.plant = this.activePlant;
-      record.reportDate = this.activeReportDate;
+      record.reportDate = this.activeReportTabName || this.activeReportDate;
       record.recommendation = recommendation;
       record.riskLevel = riskLevel;
 
@@ -1824,6 +1800,10 @@ class EpicCAPApp {
       }
       this.activePlant = e.target.value;
       apiServiceInstance.setActivePlant(this.activePlant);
+      this.activeReportDate = null;
+      this.activeReportTabName = null;
+      this.activeSpreadsheetUrl = null;
+      this.reportsList = [];
       this.updateTargetDriveLabels();
       this.loadPlantReportsHub();
       this.renderStorageDirectory();

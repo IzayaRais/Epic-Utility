@@ -215,6 +215,47 @@ export class EvidenceDB {
   }
 
   /**
+   * Retrieve photos strictly isolated to a single plant
+   */
+  async getPhotosByPlant(plant) {
+    if (!plant) return [];
+    const all = await this.getAllPhotos();
+    return all.filter(p => p.plant === plant);
+  }
+
+  /**
+   * Purge legacy test photos that lack a valid plant tag to prevent cross-plant contamination
+   */
+  async cleanupOrphanPhotos() {
+    try {
+      const db = await this.init();
+      return new Promise((resolve) => {
+        const tx = db.transaction('photos', 'readwrite');
+        const store = tx.objectStore('photos');
+        const req = store.getAll();
+        req.onsuccess = () => {
+          const records = req.result || [];
+          let count = 0;
+          for (const r of records) {
+            if (!r.plant || r.plant === 'undefined' || r.plant === 'null') {
+              store.delete(r.id);
+              count++;
+            }
+          }
+          if (count > 0) {
+            console.log(`[EvidenceDB] Purged ${count} orphan photos without plant isolation.`);
+          }
+          resolve(count);
+        };
+        req.onerror = () => resolve(0);
+      });
+    } catch (e) {
+      console.warn('[EvidenceDB] cleanupOrphanPhotos error:', e);
+      return 0;
+    }
+  }
+
+  /**
    * Retrieve single photo by ID
    */
   async getPhotoById(id) {

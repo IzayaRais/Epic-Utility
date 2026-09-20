@@ -157,6 +157,7 @@ export function generateCanonicalWatermark({
  */
 export function createPhotoRecord({
   id = crypto.randomUUID ? crypto.randomUUID() : `cap-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+  plant = null,
   serial,
   rawSerial,
   parentSerial = null,
@@ -204,6 +205,7 @@ export function createPhotoRecord({
 
   return {
     id,
+    plant: plant || null,
     serial: formattedSerial,
     displaySerial,
     rawSerial: parseInt(rawSerial || serial, 10) || 1,
